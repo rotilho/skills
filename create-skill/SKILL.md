@@ -1,59 +1,62 @@
 ---
-name: create-skill
-description: Create or improve an agent skill. Use when the user wants to add a new SKILL.md, refactor an existing skill, improve trigger accuracy, tighten instructions, or turn a repeated workflow into a reusable skill.
-license: MIT
-compatibility: opencode
+name: "create-skill"
+description: "Create or improve an agent skill. Use when the user wants a new `SKILL.md`, a rewrite of an existing skill, better trigger coverage or trigger/overlap evaluation, tighter instructions, or a repeated workflow turned into a reusable skill."
+license: "MIT"
+compatibility: "opencode"
 metadata:
-  audience: general
-  workflow: authoring
-  style: concise
+  audience: "general"
+  workflow: "authoring"
+  style: "concise"
 ---
 
 # Create Skill
 
-Use this skill when the user wants to create, rewrite, or optimize a reusable agent skill.
+Use this skill to create, rewrite, or tighten reusable agent skills.
 
-Activate it for tasks like:
+Trigger for work like:
 - create a new skill from an idea, prompt, or workflow
 - improve an existing `SKILL.md`
 - make a skill trigger more reliably
-- turn repeated instructions into a reusable skill
-- split an overgrown skill into cleaner sections or bundled resources
+- review a skill's trigger coverage or overlap without necessarily editing it
+- tighten vague or repetitive instructions
+- split an oversized skill into cleaner sections or support files
 
 ## Core promise
 
 Produce a skill that is:
 - valid for the target runtime
-- easy for an agent to trigger correctly
-- procedural instead of vague
-- as short as possible while still useful
-- verified enough to hand off with confidence
+- easy to trigger correctly
+- procedural, not vague
+- short enough to stay usable
+- verified enough to hand off
 
 Do not stop at a draft unless the user asked for planning only.
 
 ## Hard constraints
 
-Treat these as hard requirements unless the local runtime clearly documents different rules:
-
-- create one folder per skill and put `SKILL.md` inside it
+Unless local runtime docs say otherwise:
+- create one folder per skill with `SKILL.md` inside it
 - use YAML frontmatter at the top of `SKILL.md`
-- recognized frontmatter fields are `name`, `description`, `license`, `compatibility`, and `metadata`
-- `name` must be lowercase kebab-case, 1-64 chars, and match the folder name
-- `description` is the main trigger mechanism, so make it specific about when to use the skill
-- keep the body lean; if the skill grows large, move detail into `references/`, `scripts/`, or `assets/`
+- only use recognized frontmatter fields: `name`, `description`, `license`, `compatibility`, `metadata`
+- keep `name` lowercase kebab-case, 1-64 chars, and matched to the folder name
+- write `description` for triggering, not as a topic label
+- always quote string-valued YAML frontmatter fields; do not leave them unquoted
+- keep the body lean; move bulky detail into `references/`, `scripts/`, or `assets/` when needed
 
-If local repo conventions conflict with generic examples, prefer the runtime's documented constraints over stylistic habits.
+If repo conventions and runtime rules conflict, follow the runtime rules.
 
 ## Working rule
 
-Write the `description` first, not last.
+Write the `description` first.
 
-The description is what the agent sees before loading the skill. A weak description causes under-triggering even if the body is excellent. Include:
+It is the main trigger surface. A good body cannot fix a weak description.
+
+Make it say:
 - what the skill helps do
 - when it should trigger
-- nearby phrasings or contexts that should also trigger it
+- nearby phrasings that should also trigger it
 
-Be a little pushy when needed. It is usually better for a good skill to trigger slightly more often than to be invisible.
+Bias slightly toward over-triggering rather than invisibility.
 
 ## Workflow
 
@@ -61,13 +64,13 @@ Be a little pushy when needed. It is usually better for a good skill to trigger 
 
 Infer or confirm:
 - skill name
-- whether this is `new-skill` or `update-skill`
+- `new-skill` or `update-skill`
 - target runtime or repo
 - user goal
 - expected outputs
 - whether trigger optimization matters
 
-If the user did not give a name, infer a short kebab-case name.
+If the user did not give a name, infer a short kebab-case one.
 
 ### Step 2 - Inspect before writing
 
@@ -76,9 +79,9 @@ Read local examples first.
 Check:
 - existing skills in the repo
 - local tone and section patterns
-- any runtime docs for skill discovery or frontmatter rules
+- runtime docs for discovery or frontmatter rules
 
-Use local examples for style. Use documented runtime rules for validity.
+Use local examples for style and runtime docs for validity.
 
 ### Step 3 - Scaffold
 
@@ -88,9 +91,9 @@ For a new skill, scaffold with:
 npx skills init <skill-name>
 ```
 
-Then replace placeholders completely.
+Then replace every placeholder.
 
-If the scaffold command behaves oddly, clean up only what you created and continue with the intended folder.
+If scaffolding misbehaves, clean up only what you created and continue.
 
 ### Step 4 - Write the skill
 
@@ -99,20 +102,24 @@ At minimum include:
 - a clear title
 - activation guidance
 - step-by-step instructions
-- any constraints or caveats
+- constraints or caveats
 - a verification checklist
 
-Prefer imperative guidance. Tell the agent what to do.
+Prefer imperative guidance.
 
 Avoid:
-- generic mission-statement filler
-- repeating the same idea in multiple sections
-- giant walls of prose when a short checklist works
+- mission-statement filler
+- repeated guidance across sections
+- long prose where a checklist works
 - unsupported frontmatter fields
 
-### Step 5 - Use resources when warranted
+Frontmatter rule:
+- always write string-valued frontmatter fields as quoted YAML strings
+- this includes at least: `name`, `description`, `license`, `compatibility`, and string values inside `metadata`
 
-If the skill needs large or reusable material, organize it instead of bloating `SKILL.md`.
+### Step 5 - Use support files only when they help
+
+If the skill needs large or reusable material, move it out of `SKILL.md`.
 
 Typical layout:
 
@@ -126,44 +133,44 @@ skill-name/
 
 Use:
 - `references/` for long docs or domain guides
-- `scripts/` for deterministic repeated work
-- `assets/` for templates or files consumed by outputs
+- `scripts/` for repeatable deterministic work
+- `assets/` for templates or bundled files
 
 ### Step 6 - Verify triggering
 
-Create a small eval set before finishing:
+Create a small eval set:
 - 3 should-trigger prompts
 - 3 near-miss should-not-trigger prompts
 
-Check whether the description would help the agent choose this skill over adjacent ones.
+Check that the description helps the agent choose this skill over adjacent ones.
 
-Focus on realistic prompts, not toy keywords.
+Use realistic prompts.
 
-### Step 7 - Verify the final artifact
+### Step 7 - Verify the artifact
 
 Check:
-- folder exists in the expected location
-- `SKILL.md` exists and is not scaffold boilerplate
-- `name` matches folder name
-- frontmatter fields are valid and intentional
+- the folder exists where expected
+- `SKILL.md` is not scaffold boilerplate
+- `name` matches the folder name
+- frontmatter is valid and intentional
 - instructions are actionable
-- skill is not needlessly long
+- the skill is not longer than it needs to be
 
-If there is a repo-specific check for skills, run the smallest relevant one.
+If the repo has a skill check, run the smallest relevant one.
 
 ## Default structure
 
-Use this shape unless local conventions strongly suggest another one:
+Use this shape unless local conventions clearly differ:
 
 ```md
 ---
-name: <skill-name>
-description: <what it does and when to use it>
-license: <license>
-compatibility: <agent>
+name: "<skill-name>"
+description: "<what it does and when to use it>"
+license: "<license>"
+compatibility: "<agent>"
 metadata:
-  audience: <audience>
-  workflow: <workflow>
+  audience: "<audience>"
+  workflow: "<workflow>"
 ---
 
 # <Title>
@@ -181,20 +188,21 @@ metadata:
 
 ## Verification checklist
 
-Before finishing, confirm that you have:
+Before finishing, confirm that you:
 - inspected local examples
 - matched the folder name and skill name
-- written a triggerable description, not just a topic label
+- wrote a triggerable description
+- quoted string-valued YAML frontmatter fields
 - removed scaffold placeholders
 - kept the skill concise
-- added supporting files only when they earn their keep
+- added support files only when needed
 - verified the final layout
 
 ## Final answer style
 
-When reporting back, include:
+Report back with:
 - what skill was created or updated
 - which files changed
-- what you improved about triggering or structure
+- what improved in triggering or structure
 - any limitations or open risks
 - what you verified
