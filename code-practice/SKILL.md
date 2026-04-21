@@ -1,0 +1,146 @@
+---
+name: "code-practice"
+description: "Improve or apply language-agnostic, framework-neutral code practices for clean code, maintainability, refactoring, ownership, boundaries, state, error handling, testing, and reusable engineering defaults. Use when the user wants broad code quality guidance rather than Kotlin-, Spring-, or framework-specific conventions."
+license: "MIT"
+compatibility: "opencode"
+metadata:
+  audience: "general"
+  workflow: "engineering"
+  style: "concise"
+---
+
+# Code Practice
+
+Use this skill for cross-language engineering defaults.
+
+## When to use
+
+Trigger for work like:
+- clean code or maintainability guidance
+- refactoring for readability, ownership, or cohesion
+- general code style or coding conventions
+- API shape, module boundaries, and responsibility splits
+- state, mutation, concurrency, error handling, or testability concerns
+- code review focused on reusable engineering defaults rather than language or framework rules
+- application vs library tradeoffs without language-specific rules
+
+Do not use this skill when the main question is about Kotlin idioms, Spring architecture, Cucumber / BDD structure, or any framework-managed pattern.
+
+## Core promise
+
+Produce guidance or edits that:
+- keep behavior explicit
+- keep ownership clear
+- keep mutation narrow
+- make boundaries visible
+- keep tradeoffs visible
+- avoid abstraction without payoff
+
+## Hard constraints
+
+- treat this as the base layer
+- keep advice language-agnostic and framework-neutral unless the user only needs generic principles applied to a specific snippet
+- do not prescribe Kotlin, Spring, ORM, HTTP-framework, or build-tool-specific rules
+- do not drift into architecture-by-template; stay at the level of reusable engineering defaults
+- if the user clearly needs Kotlin, Spring, or Cucumber conventions, hand off to the more specific skill
+- separate application and library advice when that changes the recommendation
+
+## Workflow
+
+### Step 1 - Classify the request and boundary
+
+Decide whether the request is mainly about:
+- naming and readability
+- API shape and boundaries
+- state, mutation, or concurrency
+- error handling or logging
+- tests or change safety
+- abstraction, cohesion, or ownership
+
+Also classify the target as:
+- application
+- library
+- mixed or unclear
+
+If the main answer depends on language, framework, or platform rules, hand off instead of stretching this skill.
+
+### Step 2 - Inventory the current shape first
+
+Before prescribing changes, identify what already exists:
+- where behavior starts and ends
+- who owns each mutable state change or side effect
+- which boundaries are public, internal, or external
+- where errors are created, translated, logged, or retried
+- whether tests cover behavior, boundaries, and failure modes
+
+Keep the diagnosis gap-first: strengthen the weakest high-impact area first instead of rewriting everything.
+
+### Step 3 - Apply the base defaults
+
+Prefer these defaults unless local evidence strongly disagrees:
+- name things by responsibility
+- keep public APIs small and explicit
+- keep each unit responsible for one kind of decision
+- keep integration concerns at the edges
+- keep mutable state local to its owner
+- make concurrency and retries explicit
+- distinguish expected rejection from system failure
+- keep error translation near the boundary that changes context
+- favor simple data flow over implicit shared state
+- test behavior and boundaries, not only construction
+
+### Step 4 - Apply the right mode
+
+For applications:
+- prefer feature- or workflow-local organization
+- prefer thin external edges and clear orchestration ownership
+- prefer operationally useful logging and integration coverage at real boundaries
+
+For libraries:
+- prefer stable, explicit contracts
+- prefer wire and serialization behavior that is easy to audit
+- prefer minimal surface area and predictable failure modes
+
+### Step 5 - Use actionable review heuristics
+
+Push toward changes that:
+- reduce the number of places a behavior must be understood or edited
+- make control flow, side effects, and failure paths easier to trace
+- move policy decisions closer to their owner and incidental mechanics closer to the edge
+- replace broad indirection with direct code when the abstraction adds no leverage
+- keep comments for intent, invariants, or non-obvious tradeoffs, not narration
+
+### Step 6 - Guard against bad abstraction
+
+Push back on:
+- service layers that only forward calls
+- utility buckets with mixed concerns
+- abstractions added only for symmetry, testing ceremony, or speculative reuse
+- shared mutable state without a clear owner
+- error handling that mixes recovery, translation, and logging in every layer
+- wide interfaces that bundle unrelated capabilities
+
+### Step 7 - Explain tradeoffs briefly
+
+When recommending a pattern, state:
+- why it helps here
+- what it costs
+- what would justify breaking the default
+
+### Step 8 - Keep overlap boundaries clear
+
+If the issue is:
+- Kotlin file layout, type design, nullability, or coroutine idioms: use `kotlin-code-style`
+- Spring controllers, transactions, bean wiring, or application structure: use `spring-application-code-style`
+- Cucumber features, step definitions, hooks, or BDD test structure: use `kotlin-cucumber-tests`
+
+## Verification checklist
+
+Before finishing, confirm that you:
+- kept the guidance framework-agnostic
+- kept the guidance language-agnostic
+- separated application and library advice when needed
+- made ownership and boundaries clearer
+- improved change safety, state boundaries, or error handling where relevant
+- avoided speculative abstraction
+- did not duplicate Kotlin or Spring-specific guidance
