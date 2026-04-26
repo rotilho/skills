@@ -398,9 +398,9 @@ For time-sensitive topics, mark claims with an as-of date.
 
 ## Working memory and artifacts
 
-When file output is available and the task is substantial, maintain lightweight artifacts under `.research/`.
+When file output is available and the task is substantial, maintain lightweight artifacts under `.workbench/deep-research/`.
 
-Recommended artifacts in `.research/`:
+Recommended artifacts in `.workbench/deep-research/`:
 - `brief`: question, decision target, constraints, as-of date
 - `knowledge-map`: what is already known and how strong it is
 - `gap-map`: unresolved questions ranked by importance
@@ -420,33 +420,9 @@ Default rules:
 
 ## Core note formats
 
-### Citation registry
+For citation registry, task notes, evidence register, raw notes, and research-pack file templates, use `references/research-pack-template.md`.
 
-```md
-## Approved
-| ID | Source | Type | Accessibility | Date | Reliability | Why it matters |
-|----|--------|------|---------------|------|-------------|----------------|
-| S1 |        | official | public        |      | high        |                |
-
-## Dropped
-| Source | Type | Accessibility | Reason dropped |
-|--------|------|---------------|----------------|
-|        |      |               |                |
-```
-
-### Evidence register
-
-```md
-### Claim / Topic
-- Claim ID:
-- Source IDs:
-- Observation:
-- Inference:
-- Contradiction / alternative view:
-- Claim status: observed | inferred | unverified
-- Evidence strength: weak | moderate | strong
-- Follow-up needed:
-```
+Keep only the fields that help the current research stay traceable; do not create empty template files for lightweight answers.
 
 ## Deliverable modes
 
@@ -474,21 +450,7 @@ Suggested sections:
 
 ### Doc-pack mode
 
-Suggested file set:
-- `README.md`
-- `00-brief.md`
-- `01-knowledge-map.md`
-- `02-gap-map.md`
-- `03-plan.md`
-- `04-source-log.md`
-- `05-citation-registry.md`
-- `06-task-notes.md`
-- `07-evidence-register.md`
-- `08-raw-notes.md`
-- `09-executive-summary.md`
-- `10-key-findings.md`
-- `11-risks-open-questions.md`
-- `12-sources.md`
+Use the suggested file set in `references/research-pack-template.md`.
 
 For smaller tasks, combine files, but keep distinct:
 - existing knowledge

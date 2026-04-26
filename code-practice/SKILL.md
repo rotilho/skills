@@ -170,6 +170,11 @@ If the issue is:
 - Spring controllers, transactions, bean wiring, or application structure: use `spring-application-code-style`
 - Cucumber features, step definitions, hooks, or BDD test structure: use `kotlin-cucumber-tests`
 
+## Canonical references
+
+- OpenCode agent skill format: https://opencode.ai/docs/skills/
+- Clean Code principles are contextual; prefer this skill's ownership and boundary rules over language-specific style-guide details when no more specific skill applies.
+
 ## Verification checklist
 
 Before finishing, confirm that you:

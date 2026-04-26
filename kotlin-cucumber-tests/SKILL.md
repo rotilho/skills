@@ -143,6 +143,13 @@ If you recommend moving a test, say why:
 - integration tests for boundary wiring and infrastructure behavior
 - unit tests for local logic and dense edge cases
 
+## Canonical references
+
+- Cucumber documentation: https://cucumber.io/docs/
+- Cucumber reference: https://cucumber.io/docs/cucumber/
+- Cucumber JVM: https://github.com/cucumber/cucumber-jvm
+- Cucumber Expressions: https://github.com/cucumber/cucumber-expressions
+
 ## Verification checklist
 
 Before finishing, confirm that you:

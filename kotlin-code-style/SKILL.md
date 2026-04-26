@@ -114,6 +114,12 @@ If the issue is:
 - Kotlin Cucumber, feature files, step definitions, or BDD glue design: use `kotlin-cucumber-tests`
 - Spring controllers, configuration, transactions, or integration testing: use `spring-application-code-style`
 
+## Canonical references
+
+- Kotlin coding conventions: https://kotlinlang.org/docs/coding-conventions.html
+- Kotlin coroutines: https://kotlinlang.org/docs/coroutines-overview.html
+- Kotlin Flow: https://kotlinlang.org/docs/flow.html
+
 ## Verification checklist
 
 Before finishing, confirm that you:

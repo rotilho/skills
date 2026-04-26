@@ -99,6 +99,12 @@ If the issue is:
 - general API design, mutation, logging, or testing defaults: use `code-practice`
 - Kotlin file layout, extensions, nullability, or coroutine mechanics outside Spring boundaries: use `kotlin-code-style`
 
+## Canonical references
+
+- Spring Boot reference: https://docs.spring.io/spring-boot/index.html
+- Spring Framework reference: https://docs.spring.io/spring-framework/reference/
+- Spring Guides: https://spring.io/guides
+
 ## Verification checklist
 
 Before finishing, confirm that you:
