@@ -31,7 +31,7 @@ Produce Spring application guidance or edits that:
 - keep HTTP and framework edges thin
 - keep business sequencing out of controllers
 - use Spring for lifecycle and infrastructure concerns
-- keep core logic readable as plain Kotlin where possible
+- keep Spring annotations and framework abstractions at real application boundaries
 
 ## Hard constraints
 
@@ -58,13 +58,17 @@ Classify the request around one or more of:
 ### Step 2 - Apply Spring application defaults
 
 Prefer these defaults unless local evidence says otherwise:
-- organize by feature first
-- keep controllers focused on HTTP concerns
-- keep business sequencing in services or processors
-- keep repositories focused on query and persistence intent
+- organize by feature or workflow first, not by technical layer
+- keep root application packages for bootstrap, composition, entrypoints, and shared public API only
+- keep controllers and listeners focused on protocol or framework translation
+- keep business sequencing in the owning feature package
+- keep repositories and persistence adapters near the feature they persist unless persistence is shared infrastructure
+- keep configuration feature-owned when it wires one feature
+- use root or shared configuration only for app bootstrap, external clients, infrastructure factories, lifecycle scopes, or cross-feature composition
+- prefer `@Component` for application-owned collaborators with simple constructor wiring
+- use `@Bean` for external objects, factories, properties, lifecycle scopes, or non-trivial wiring
 - keep transactional boundaries out of controllers
 - validate critical configuration at startup
-- use explicit configuration beans for non-trivial wiring
 - use operational logging and metrics where workflows need them
 
 ### Step 3 - Use the right Spring patterns
@@ -81,6 +85,10 @@ Prefer:
 
 Push back on:
 - controllers owning write orchestration or background coordination
+- `service`, `manager`, `processor`, `handler`, `config`, `dto`, `model`, or `event` packages created only by technical type
+- feature logic placed in root application packages
+- configuration classes added only for symmetry
+- broad event or listener classes that mix unrelated feature workflows
 - raw property lookups spread through the codebase
 - publishing downstream facts before the related write commits without an explicit tradeoff
 - pushing simple business logic into framework abstractions for no gain
@@ -96,6 +104,6 @@ If the issue is:
 Before finishing, confirm that you:
 - kept the guidance Spring-application-specific
 - kept controllers thin and orchestration elsewhere
-- used Spring for infrastructure and plain Kotlin for core logic where appropriate
+- kept Spring annotations, lifecycle, and infrastructure concerns at application boundaries
 - avoided inventing unsupported framework house rules
 - did not drift into generic or Kotlin-only guidance
