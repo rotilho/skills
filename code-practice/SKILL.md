@@ -111,6 +111,7 @@ Prefer these defaults unless local evidence strongly disagrees:
 - remove duplication at the level of behavior or policy, not just repeated tokens
 - favor simple data flow over implicit shared state
 - use already-available values directly when cleanup, reshaping, or normalization has no correctness or readability payoff
+- normalize external input at the boundary that accepts it; do not normalize domain values in the middle of behavior owners
 - test behavior and boundaries, not only construction
 - make tests readable enough to explain the scenario, action, and expected outcome without extra narration
 
@@ -155,6 +156,41 @@ Push back on:
 - shared mutable state without a clear owner
 - error handling that mixes recovery, translation, and logging in every layer
 - wide interfaces that bundle unrelated capabilities
+
+### Step 6a - Apply event-owned refactoring when current code is coupled
+
+When refactoring event- or command-heavy application code, prefer these moves:
+
+- find the owner from the state transition or side effect, not from the current caller
+- delete forwarding layers instead of renaming or polishing them
+- publish facts that real consumers need; avoid micro-events for internal steps
+- let consumers keep local event-fed caches for synchronous decisions
+- keep execution-safety side effects close to the execution boundary
+- replace registries with facts when one validator is the real consumer
+- make expected rejection a domain outcome, not an exception caught by a generic wrapper
+
+Examples:
+
+```kotlin
+// Bad: forwarding layer owns no decision.
+fun onRefund(command: RefundOrder) = billing.refund(command.orderId)
+
+// Better: real owner consumes the fact/command and publishes a domain fact.
+fun onRefund(command: RefundOrder) {
+    refunds[command.orderId] = RefundStatus.APPROVED
+    publish(OrderRefunded(command.orderId))
+}
+```
+
+```kotlin
+// Bad: shared registry only feeds one validator.
+validator.validate(order, customerRegistry.customers())
+
+// Better: validator keeps the local cache it needs.
+fun onCustomerBlocked(event: CustomerBlocked) {
+    blockedCustomers += event.customerId
+}
+```
 
 ### Step 7 - Explain tradeoffs briefly
 

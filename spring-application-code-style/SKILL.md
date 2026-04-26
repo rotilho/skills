@@ -62,6 +62,7 @@ Prefer these defaults unless local evidence says otherwise:
 - keep root application packages for bootstrap, composition, entrypoints, and shared public API only
 - keep controllers and listeners focused on protocol or framework translation
 - keep business sequencing in the owning feature package
+- use `@EventListener` in a behavior owner when it owns the resulting state change; avoid listener classes that only forward
 - keep repositories and persistence adapters near the feature they persist unless persistence is shared infrastructure
 - keep configuration feature-owned when it wires one feature
 - use root or shared configuration only for app bootstrap, external clients, infrastructure factories, lifecycle scopes, or cross-feature composition
@@ -89,9 +90,35 @@ Push back on:
 - feature logic placed in root application packages
 - configuration classes added only for symmetry
 - broad event or listener classes that mix unrelated feature workflows
+- `@EventListener` methods that only call another component without owning validation, state, lifecycle, retry, translation, or a side effect
 - raw property lookups spread through the codebase
 - publishing downstream facts before the related write commits without an explicit tradeoff
 - pushing simple business logic into framework abstractions for no gain
+
+### Step 4a - Spring event listener examples
+
+Prefer behavior-owned event listeners:
+
+```kotlin
+@Component
+class InventoryReservations(private val events: DomainEvents) {
+    @EventListener
+    fun onOrderPlaced(event: OrderPlaced) {
+        reserved[event.sku] = (reserved[event.sku] ?: 0) + event.quantity
+        events.publish(InventoryReserved(event.orderId, event.sku, event.quantity))
+    }
+}
+```
+
+Avoid pass-through listener classes:
+
+```kotlin
+@Component
+class OrderListener(private val service: OrderService) {
+    @EventListener
+    fun onOrderPlaced(event: OrderPlaced) = service.reserveInventory(event)
+}
+```
 
 ### Step 5 - Keep ownership boundaries clear
 

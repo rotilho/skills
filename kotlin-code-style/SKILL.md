@@ -73,6 +73,7 @@ Prefer these defaults unless local code shows a better house style:
 - `suspend` for one-shot async work and `Flow` for streams
 - coroutine scopes, channels, mutexes, and background jobs owned by the lifecycle or workflow that starts and stops them
 - mutable collections and `MutableStateFlow` hidden behind the narrow Kotlin type that owns their invariants
+- local event-fed caches owned by the Kotlin type that makes the synchronous decision; extract shared state only after repetition is real
 - sparse comments focused on the why
 
 ### Step 3 - Apply the right Kotlin mode
@@ -106,6 +107,34 @@ Push back on:
 - hidden background work with unclear scope ownership
 - coroutine workers started without a clear owner, shutdown path, and failure boundary
 - mutable maps, mutable lists, or `MutableStateFlow` exposed outside their owner
+
+### Step 4a - Kotlin examples for event-owned state
+
+Prefer small local caches when a component needs synchronous validation from events:
+
+```kotlin
+private val blockedCustomers = ConcurrentHashMap.newKeySet<CustomerId>()
+
+@EventListener
+fun onCustomerBlocked(event: CustomerBlocked) {
+    blockedCustomers += event.customerId
+}
+
+fun canPlaceOrder(customerId: CustomerId): Boolean =
+    customerId !in blockedCustomers
+```
+
+Keep execution-safety Flow collection inside the lifecycle owner rather than routing through an app event when directness matters:
+
+```kotlin
+fun start(scope: CoroutineScope) {
+    scope.launch {
+        printer.connectionState.collect { state ->
+            if (state == PrinterState.CONNECTED) flushQueuedJobs()
+        }
+    }
+}
+```
 
 ### Step 5 - Keep overlap boundaries clear
 

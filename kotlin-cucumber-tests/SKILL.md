@@ -84,12 +84,28 @@ Prefer these defaults:
 - reuse steps when the phrasing represents the same behavior, but do not over-parameterize unrelated actions into one vague mega-step
 - use data tables or doc strings when they make the example clearer than many scalar parameters
 - keep assertions in `Then` steps focused on observable outcomes
+- for event-owned systems, phrase steps around commands, facts, and visible outcomes rather than class names or internal methods
 
 Avoid:
 - feature-coupled step files that duplicate nearly identical glue
 - steps that directly expose internal method names, DTO fields, CSS selectors, or transport details unless those are part of the behavior contract
 - long imperative logic inside step definitions
 - ambiguous expressions that can match multiple steps
+
+Example:
+
+```gherkin
+When customer "alice" places an order for 2 mugs
+Then inventory is reserved for customer "alice"
+And the order is accepted
+```
+
+Prefer this over:
+
+```gherkin
+When OrderService.reserveInventory is called
+Then InventoryReservations contains SKU "mug"
+```
 
 ### Step 4 - Apply Kotlin-specific glue design
 
