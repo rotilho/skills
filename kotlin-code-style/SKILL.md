@@ -1,6 +1,6 @@
 ---
 name: "kotlin-code-style"
-description: "Apply Kotlin-specific code style and design guidance for file organization, type design, constructors, extensions, nullability, serialization, coroutines, Flow, and Kotlin unit/integration test style outside Cucumber or BDD. Use when the user wants idiomatic Kotlin conventions or Kotlin-language-specific code review guidance, excluding Spring application architecture, Spring-managed wiring concerns, and Cucumber/BDD-specific test design."
+description: "Apply Kotlin-specific code style and design guidance for Kotlin implementation and review: feature-owned file and type organization, helper and extension placement, type design, constructors, nullability, serialization, coroutines, Flow, mutable state ownership, and Kotlin unit/integration test style outside Cucumber or BDD. Use when writing or changing Kotlin code unless Spring application architecture or Cucumber/BDD is the main concern."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -32,6 +32,7 @@ Produce Kotlin guidance or edits that:
 - keep Kotlin features visible and intentional
 - use nullability, coroutines, and serialization deliberately
 - keep helper placement and ownership easy to follow
+- keep helpers, extensions, models, and coroutine owners near the behavior they support
 
 ## Hard constraints
 
@@ -58,19 +59,30 @@ Focus on the main Kotlin concern:
 
 Prefer these defaults unless local code shows a better house style:
 - one main public type per file
+- name files after the main owned type or behavior; avoid broad names like `Models.kt`, `Extensions.kt`, `Utils.kt`, `Helpers.kt`, or `Support.kt`
+- split multi-type files when types belong to different feature owners or change for different reasons
+- keep small related value types together only when they form one concept and are usually read or changed together
 - `data class` for small immutable values
 - constructors for straightforward creation, factories when creation has rules
-- nearby extensions over broad utility files
+- nearby extensions over broad utility files; place them next to the owned feature or type they support
 - expression bodies only when the function stays obvious
+- direct `if` / `when` and early returns when they make straightforward branches easier to scan
+- local `if` / `when` over `?.let`, `also`, or `run` when there is no real scoping or receiver benefit
+- scope functions when they improve locality or receiver clarity, not just to avoid writing a simple branch
 - nullability as part of the contract
 - `suspend` for one-shot async work and `Flow` for streams
+- coroutine scopes, channels, mutexes, and background jobs owned by the lifecycle or workflow that starts and stops them
+- mutable collections and `MutableStateFlow` hidden behind the narrow Kotlin type that owns their invariants
 - sparse comments focused on the why
 
 ### Step 3 - Apply the right Kotlin mode
 
 For applications:
-- prefer feature-local organization
+- prefer feature-local Kotlin files and packages from the first implementation
+- keep core feature logic in ordinary Kotlin types and functions when no framework-managed lifecycle, wiring, or external boundary is involved
+- prefer one lifecycle owner for each coroutine scope, channel, mutex, or background worker
 - prefer explicit concurrency primitives around shared mutable runtime state
+- prefer internal feature-owned models over root-level shared model files
 - prefer boundary-specific serialization choices
 
 For libraries:
@@ -82,10 +94,18 @@ For libraries:
 
 Push back on:
 - catch-all extension files
+- root-level `Models.kt`, `Extensions.kt`, `Utils.kt`, `Helpers.kt`, or `Support.kt` files that mix feature concepts
+- packages split only by type category instead of feature ownership
+- top-level functions that hide which feature owns the behavior
+- `object` singletons used as dumping grounds for unrelated helpers
 - `!!` outside tight invariant boundaries
-- deep scope-function or operator chains that hide control flow
-- interfaces added only for symmetry or testing ceremony
+- scope-function or operator chains that hide straightforward control flow
+- Kotlin helper or extension extraction only to reshape one local value for one call site
+- Kotlin-local normalization or reshaping chains around simple inputs unless nullability, parsing correctness, or the user request requires them
+- nullable chains or expression-body cleverness when explicit branching would be clearer
 - hidden background work with unclear scope ownership
+- coroutine workers started without a clear owner, shutdown path, and failure boundary
+- mutable maps, mutable lists, or `MutableStateFlow` exposed outside their owner
 
 ### Step 5 - Keep overlap boundaries clear
 
@@ -100,5 +120,8 @@ Before finishing, confirm that you:
 - added Kotlin-specific guidance rather than generic restatement
 - kept helper placement and ownership clear
 - treated nullability and async behavior explicitly
+- kept coroutine and mutable-state ownership narrow
+- preferred direct control flow over clever chaining where the branch was straightforward
+- avoided adding normalization or reshaping code unless correctness or the request justified it
 - separated application and library advice when it mattered
 - avoided Spring-specific framework guidance
