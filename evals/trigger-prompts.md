@@ -7,6 +7,8 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | Prompt | Expected skill | Why |
 |---|---|---|
 | "Refactor this function for clearer naming and ownership without using framework-specific rules." | `code-practice` | Framework-neutral maintainability. |
+| "Class A calls five collaborators today. Should it keep direct calls or publish one event and let each owner react?" | `component-collaboration-architecture` | Collaboration shape and ownership decision. |
+| "This listener just forwards events to another service. Refactor the flow so behavior and state ownership are clearer." | `component-collaboration-architecture` | Proxy/listener removal across components. |
 | "Rewrite this update in concise mode but keep the warning clear." | `concise` | Communication style and brevity. |
 | "Create a new skill for release-note generation and include trigger eval prompts." | `create-skill` | Skill authoring and trigger evaluation. |
 | "Research current options for hosted vector databases and recommend one with sources." | `deep-research` | Multi-source evidence-backed research. |
@@ -19,6 +21,7 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 
 | Prompt | Skill that should stay inactive | Better fit |
 |---|---|---|
+| "Rename this helper and simplify the nested conditionals." | `component-collaboration-architecture` | `code-practice` |
 | "Fix a Kotlin Cucumber step definition that leaks scenario state." | `kotlin-code-style` | `kotlin-cucumber-tests` |
 | "Explain how to wire a Spring `@ConfigurationProperties` class." | `kotlin-code-style` | `spring-application-code-style` |
 | "Make this plain Kotlin value object idiomatic." | `spring-application-code-style` | `kotlin-code-style` |
@@ -29,6 +32,7 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 ## Realistic workflow prompts
 
 - "Given this mixed `service` package, identify the owning workflows, move behavior to feature-owned homes, and explain the tradeoffs."
+- "Given this coordinator that forwards commands and events through handlers, decide which interactions should be direct calls, events, projections, or owned workflows."
 - "Add a Kotlin Flow endpoint in a Spring WebFlux app; keep coroutine ownership and Spring boundaries clear."
 - "Turn these product acceptance notes into Cucumber scenarios and Kotlin step glue without coupling to DTO field names."
 - "Audit this local docs folder, merge duplicate knowledge, and create only the durable wiki pages that have clear owners."

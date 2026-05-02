@@ -23,6 +23,7 @@ OpenCode can also discover skills from `.opencode/skills`, `.claude/skills`, `.a
 | Skill | Use when | Avoid when |
 |---|---|---|
 | `code-practice` | Framework-neutral code quality, naming, boundaries, state, error handling, tests, refactoring. | Kotlin, Spring, or Cucumber-specific rules dominate. |
+| `component-collaboration-architecture` | Choosing direct calls, orchestration, events, observers, projections, state ownership, and proxy removal across components. | The task is only local cleanup, language idioms, framework wiring, or test glue. |
 | `concise` | Default concise communication, brief updates, tighter rewrites. | User asks for fuller, warmer, formal, legal, or safety-sensitive detail. |
 | `create-skill` | Creating, rewriting, or evaluating agent skills and trigger boundaries. | The task is ordinary docs/code work rather than reusable skill behavior. |
 | `deep-research` | Evidence-backed research, comparisons, audits, and gap-first source validation. | Routine local code or prompt review with no research need. |
