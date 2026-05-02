@@ -123,6 +123,7 @@ class OrderListener(private val service: OrderService) {
 ### Step 5 - Keep ownership boundaries clear
 
 If the issue is:
+- direct calls vs events, proxy/listener chains, projections, or ownership across components: use `component-collaboration-architecture`
 - general API design, mutation, logging, or testing defaults: use `code-practice`
 - Kotlin file layout, extensions, nullability, or coroutine mechanics outside Spring boundaries: use `kotlin-code-style`
 
