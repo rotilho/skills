@@ -25,7 +25,7 @@ Trigger for work like:
 - code review focused on reusable engineering defaults rather than language or framework rules
 - application vs library tradeoffs without language-specific rules
 
-Do not use this skill when the main question is about Kotlin idioms, Spring architecture, Cucumber / BDD structure, or any framework-managed pattern.
+Do not use this skill when the main question is about component collaboration shape, Kotlin idioms, Spring architecture, Cucumber / BDD structure, or any framework-managed pattern.
 
 ## Core promise
 
@@ -169,6 +169,8 @@ When refactoring event- or command-heavy application code, prefer these moves:
 - replace registries with facts when one validator is the real consumer
 - make expected rejection a domain outcome, not an exception caught by a generic wrapper
 
+If the main decision is whether components should use direct calls, orchestration, events, projections, observers, or local state ownership, use `component-collaboration-architecture` instead of stretching this base skill.
+
 Examples:
 
 ```kotlin
@@ -202,6 +204,7 @@ When recommending a pattern, state:
 ### Step 8 - Keep overlap boundaries clear
 
 If the issue is:
+- direct calls vs events, listener/proxy chains, projections, or cross-component state ownership: use `component-collaboration-architecture`
 - Kotlin file layout, type design, nullability, or coroutine idioms: use `kotlin-code-style`
 - Spring controllers, transactions, bean wiring, or application structure: use `spring-application-code-style`
 - Cucumber features, step definitions, hooks, or BDD test structure: use `kotlin-cucumber-tests`
