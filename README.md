@@ -27,6 +27,7 @@ OpenCode can also discover skills from `.opencode/skills`, `.claude/skills`, `.a
 | `concise` | Default concise communication, brief updates, tighter rewrites. | User asks for fuller, warmer, formal, legal, or safety-sensitive detail. |
 | `create-skill` | Creating, rewriting, or evaluating agent skills and trigger boundaries. | The task is ordinary docs/code work rather than reusable skill behavior. |
 | `deep-research` | Evidence-backed research, comparisons, audits, and gap-first source validation. | Routine local code or prompt review with no research need. |
+| `design-extractor` | Create or audit `DESIGN.md` from screenshots, Figma, CSS, tokens, brand notes, or app references, including evidence counts and conflicts. | Ordinary frontend implementation when no durable `DESIGN.md` or design extraction is requested. |
 | `kotlin-code-style` | Kotlin file/type organization, nullability, extensions, coroutines, Flow, tests. | Spring architecture or Cucumber/BDD is central. |
 | `kotlin-cucumber-tests` | Kotlin Cucumber feature files, steps, hooks, fixtures, and executable specs. | Generic unit tests, plain Kotlin style, or Spring test architecture. |
 | `spring-application-code-style` | Spring Boot application package structure, controllers, repositories, transactions, wiring, integration tests. | Plain Kotlin, framework-neutral code quality, or Spring internals/libraries. |

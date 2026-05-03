@@ -1,0 +1,3 @@
+[submodule "design-extractor/references"]
+	path = design-extractor/references
+	url = https://github.com/google-labs-code/design.md

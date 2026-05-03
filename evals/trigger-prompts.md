@@ -12,6 +12,7 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Rewrite this update in concise mode but keep the warning clear." | `concise` | Communication style and brevity. |
 | "Create a new skill for release-note generation and include trigger eval prompts." | `create-skill` | Skill authoring and trigger evaluation. |
 | "Research current options for hosted vector databases and recommend one with sources." | `deep-research` | Multi-source evidence-backed research. |
+| "Create a DESIGN.md from these screenshots, Tailwind config, and brand notes; count which references support each section and flag inconsistencies." | `design-extractor` | DESIGN.md extraction with evidence counts and conflicts. |
 | "Clean up these Kotlin extensions, nullability checks, and coroutine scope ownership." | `kotlin-code-style` | Kotlin-specific implementation style. |
 | "Review these Kotlin Cucumber feature files and step definitions for BDD quality." | `kotlin-cucumber-tests` | Cucumber feature/step design. |
 | "Improve this Spring Boot controller/service/repository package structure and transaction boundary." | `spring-application-code-style` | Spring application architecture. |
@@ -27,12 +28,14 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Make this plain Kotlin value object idiomatic." | `spring-application-code-style` | `kotlin-code-style` |
 | "Write generic unit tests for a pure function." | `kotlin-cucumber-tests` | `code-practice` or language-specific test style |
 | "Summarize this provided note more briefly." | `deep-research` | `concise` |
+| "Make this dashboard visually cleaner without producing a DESIGN.md." | `design-extractor` | Frontend design or implementation guidance |
 | "Organize temporary raw scrape outputs from a research run." | `wiki` | `deep-research` working artifacts |
 
 ## Realistic workflow prompts
 
 - "Given this mixed `service` package, identify the owning workflows, move behavior to feature-owned homes, and explain the tradeoffs."
 - "Given this coordinator that forwards commands and events through handlers, decide which interactions should be direct calls, events, projections, or owned workflows."
+- "Extract a DESIGN.md from the existing app screens and CSS, then list conflicting color and spacing evidence."
 - "Add a Kotlin Flow endpoint in a Spring WebFlux app; keep coroutine ownership and Spring boundaries clear."
 - "Turn these product acceptance notes into Cucumber scenarios and Kotlin step glue without coupling to DTO field names."
 - "Audit this local docs folder, merge duplicate knowledge, and create only the durable wiki pages that have clear owners."
