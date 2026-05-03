@@ -1,6 +1,6 @@
 ---
 name: "kotlin-code-style"
-description: "Apply Kotlin-specific code style and design guidance for Kotlin implementation and review: feature-owned file and type organization, helper and extension placement, type design, constructors, nullability, serialization, coroutines, Flow, mutable state ownership, and Kotlin unit/integration test style outside Cucumber or BDD. Use when writing or changing Kotlin code unless Spring application architecture or Cucumber/BDD is the main concern."
+description: "Apply Kotlin-specific code style and design guidance for Kotlin implementation and review: feature-owned file and type organization, helper and extension placement, type design, constructors, nullability, serialization, coroutines, Flow, mutable state ownership, and Kotlin unit/integration test style outside Cucumber or BDD. Use when writing or changing Kotlin code unless Spring application architecture or Cucumber/BDD is the main concern. When this skill loads, also load `code-practice` as the shared engineering base layer."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -12,6 +12,12 @@ metadata:
 # Kotlin Code Style
 
 Use this skill for Kotlin-specific guidance.
+
+## Required companion skill
+
+Immediately load `code-practice` after loading this skill.
+
+Use `code-practice` for shared naming, ownership, boundaries, state, error handling, testing, and abstraction defaults. Then use this skill to refine or override those defaults only where Kotlin-specific language behavior, idioms, or tooling changes the recommendation.
 
 ## When to use
 
@@ -36,7 +42,7 @@ Produce Kotlin guidance or edits that:
 
 ## Hard constraints
 
-- treat generic code-practice guidance as the base layer
+- load and treat `code-practice` guidance as the base layer
 - add Kotlin-specific refinements instead of restating generic rules
 - do not expand into Spring Boot, controller, transaction, or bean-wiring guidance
 - separate application and library Kotlin advice when the distinction changes the answer

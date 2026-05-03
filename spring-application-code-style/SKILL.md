@@ -1,6 +1,6 @@
 ---
 name: "spring-application-code-style"
-description: "Apply Spring Boot application-layer conventions for package structure, controllers, services, repositories, transactions, configuration properties, bean wiring, observability, and integration testing. Use when the user wants Spring application structure or Spring application architecture and wiring guidance, including coroutine or Flow usage inside Spring-managed code, especially for WebFlux or coroutine-first services, not shared libraries or framework internals."
+description: "Apply Spring Boot application-layer conventions for package structure, controllers, services, repositories, transactions, configuration properties, bean wiring, observability, and integration testing. Use when the user wants Spring application structure or Spring application architecture and wiring guidance, including coroutine or Flow usage inside Spring-managed code, especially for WebFlux or coroutine-first services, not shared libraries or framework internals. When this skill loads, also load `code-practice` as the shared engineering base layer."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -12,6 +12,12 @@ metadata:
 # Spring Application Code Style
 
 Use this skill for Spring application conventions.
+
+## Required companion skill
+
+Immediately load `code-practice` after loading this skill.
+
+Use `code-practice` for shared naming, ownership, boundaries, state, error handling, testing, and abstraction defaults. Then use this skill to refine or override those defaults only where Spring application lifecycle, framework boundaries, or infrastructure concerns change the recommendation.
 
 ## When to use
 
@@ -36,7 +42,7 @@ Produce Spring application guidance or edits that:
 ## Hard constraints
 
 - this skill is application-only, not a generic Spring or library skill
-- use `code-practice` for framework-neutral defaults
+- load and use `code-practice` for framework-neutral defaults
 - use `kotlin-code-style` for pure Kotlin concerns unless they are directly tied to Spring usage
 - do not infer unsupported house rules such as mandatory Bean Validation, global exception advice, or slice-test defaults unless the local codebase shows them
 
