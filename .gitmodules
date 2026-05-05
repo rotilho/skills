@@ -1,3 +1,6 @@
 [submodule "design-extractor/references"]
 	path = design-extractor/references
 	url = https://github.com/google-labs-code/design.md
+[submodule "humanizer"]
+	path = humanizer
+	url = https://github.com/blader/humanizer
