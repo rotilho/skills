@@ -13,7 +13,7 @@ Repo-local agent skills for OpenCode-compatible agents. They emphasize concise, 
 From this repo root:
 
 ```bash
-npx skills add ~/IdeaProjects/skills/ -g -y --all
+npx skills add ~/IdeaProjects/skills/ -g --all -y
 ```
 
 OpenCode can also discover skills from `.opencode/skills`, `.claude/skills`, `.agents/skills`, and global equivalents. This repo keeps the source of truth at the repo root as `<skill-name>/SKILL.md`.
@@ -22,6 +22,7 @@ OpenCode can also discover skills from `.opencode/skills`, `.claude/skills`, `.a
 
 | Skill | Use when | Avoid when |
 |---|---|---|
+| `auto-skill-capture` | Creating or updating global or repo-local reusable skills after complex, repeated, correction-heavy, tricky-debugging, or environment-specific work. | The work is routine, one-off, private, temporary, or should remain a task log. |
 | `code-practice` | Framework-neutral code quality, naming, boundaries, state, error handling, tests, refactoring. | Kotlin, Spring, or Cucumber-specific rules dominate. |
 | `component-collaboration-architecture` | Choosing direct calls, orchestration, events, observers, projections, state ownership, and proxy removal across components. | The task is only local cleanup, language idioms, framework wiring, or test glue. |
 | `concise` | Default concise communication, brief updates, tighter rewrites. | User asks for fuller, warmer, formal, legal, or safety-sensitive detail. |
@@ -30,6 +31,7 @@ OpenCode can also discover skills from `.opencode/skills`, `.claude/skills`, `.a
 | `design-extractor` | Create or audit `DESIGN.md` from screenshots, Figma, CSS, tokens, brand notes, or app references, including evidence counts and conflicts. | Ordinary frontend implementation when no durable `DESIGN.md` or design extraction is requested. |
 | `kotlin-code-style` | Kotlin file/type organization, nullability, extensions, coroutines, Flow, tests. | Spring architecture or Cucumber/BDD is central. |
 | `kotlin-cucumber-tests` | Kotlin Cucumber feature files, steps, hooks, fixtures, and executable specs. | Generic unit tests, plain Kotlin style, or Spring test architecture. |
+| `skill-library-curator` | Periodic curation of global or repo-local skills, duplicate merges, promotions, embeddings, archive moves, vague skill cleanup, and curation reports. | Creating one new skill without reviewing the broader library. |
 | `spring-application-code-style` | Spring Boot application package structure, controllers, repositories, transactions, wiring, integration tests. | Plain Kotlin, framework-neutral code quality, or Spring internals/libraries. |
 | `wiki` | Maintaining durable repo wiki/knowledge-base pages and deciding where knowledge belongs. | Temporary scratch notes or research collection that should stay in `.workbench/`. |
 

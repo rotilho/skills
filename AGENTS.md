@@ -8,7 +8,7 @@ These instructions apply to this skills repository.
 
 - Treat each root-level `<skill-name>/SKILL.md` as the source of truth for that skill.
 - Keep bundled references under the owning skill folder.
-- Refresh installed skills with `npx skills add /var/home/felipe/IdeaProjects/skills/ -g -y --all` after changing a skill.
+- Refresh installed skills with `npx skills add ~/IdeaProjects/skills/ -g --all -y` after changing a skill.
 
 ## Testing Skills
 
