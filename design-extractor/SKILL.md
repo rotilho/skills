@@ -1,5 +1,6 @@
 ---
 name: "design-extractor"
+version: "1.0.0"
 description: "Create, audit, or refresh a DESIGN.md design-system file from visual and product references such as screenshots, Figma exports, existing CSS, Tailwind configs, design tokens, brand notes, sample pages, or app UI. Use when the task asks for DESIGN.md, design extraction, design-system inference, or converting scattered design evidence into structured tokens and guidance. Count the source references used for each section or major token group, and surface conflicts, inconsistencies, and inferred decisions instead of hiding uncertainty."
 license: "MIT"
 compatibility: "opencode"

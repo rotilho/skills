@@ -1,5 +1,6 @@
 ---
 name: "component-collaboration-architecture"
+version: "1.0.0"
 description: "Design or refactor how components, classes, modules, or services collaborate by choosing direct calls, orchestration, events, observers, projections, shared state, or local ownership. Use when a class calls many collaborators, handlers/listeners/proxies only forward, ownership of behavior/data/state is unclear, or the user asks whether to emit an event and consume it in N places. Avoid for ordinary cleanup, Kotlin idioms, Spring wiring, or Cucumber structure unless collaboration boundaries are the main issue."
 license: "MIT"
 compatibility: "opencode"

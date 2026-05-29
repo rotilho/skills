@@ -1,5 +1,6 @@
 ---
 name: "deep-research"
+version: "1.0.0"
 description: "Run thorough, evidence-backed research or audit and refresh existing research artifacts with a gap-first workflow: inventory existing knowledge, identify only the missing high-impact gaps, verify important claims with primary sources, and synthesize a decision-useful answer with traceable evidence. Use for research-heavy comparisons, validation, or evidence-backed audits, not routine local code or prompt review."
 license: "MIT"
 compatibility: "opencode"

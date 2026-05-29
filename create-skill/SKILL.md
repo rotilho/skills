@@ -1,5 +1,6 @@
 ---
 name: "create-skill"
+version: "1.0.0"
 description: "Create or improve an agent skill. Use when the user wants a new `SKILL.md`, a rewrite of an existing skill, better trigger coverage or trigger/overlap evaluation, tighter instructions, or a repeated workflow turned into a reusable skill."
 license: "MIT"
 compatibility: "opencode"
@@ -37,8 +38,9 @@ Do not stop at a draft unless the user asked for planning only.
 Unless local runtime docs say otherwise:
 - create one folder per skill with `SKILL.md` inside it
 - use YAML frontmatter at the top of `SKILL.md`
-- only use recognized frontmatter fields: `name`, `description`, `license`, `compatibility`, `metadata`
+- only use recognized frontmatter fields: `name`, `version`, `description`, `license`, `compatibility`, `metadata`
 - keep `name` lowercase kebab-case, 1-64 chars, and matched to the folder name
+- keep `version` as a quoted semantic version string and bump it when skill behavior changes
 - write `description` for triggering, not as a topic label
 - always quote string-valued YAML frontmatter fields; do not leave them unquoted
 - keep the body lean; move bulky detail into `references/`, `scripts/`, or `assets/` when needed
@@ -115,7 +117,7 @@ Avoid:
 
 Frontmatter rule:
 - always write string-valued frontmatter fields as quoted YAML strings
-- this includes at least: `name`, `description`, `license`, `compatibility`, and string values inside `metadata`
+- this includes at least: `name`, `version`, `description`, `license`, `compatibility`, and string values inside `metadata`
 
 ### Step 5 - Use support files only when they help
 
@@ -165,6 +167,7 @@ Use this shape unless local conventions clearly differ:
 ```md
 ---
 name: "<skill-name>"
+version: "1.0.0"
 description: "<what it does and when to use it>"
 license: "<license>"
 compatibility: "<agent>"
@@ -191,6 +194,7 @@ metadata:
 Before finishing, confirm that you:
 - inspected local examples
 - matched the folder name and skill name
+- included a quoted `version`
 - wrote a triggerable description
 - quoted string-valued YAML frontmatter fields
 - removed scaffold placeholders

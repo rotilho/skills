@@ -1,5 +1,6 @@
 ---
 name: "code-practice"
+version: "1.0.0"
 description: "Improve or apply language-agnostic, framework-neutral code practices for clean code, maintainability, refactoring, naming, readability, ownership, boundaries, state, error handling, testing, and reusable engineering defaults. Use when the user wants broad code quality guidance rather than Kotlin-, Spring-, or framework-specific conventions."
 license: "MIT"
 compatibility: "opencode"

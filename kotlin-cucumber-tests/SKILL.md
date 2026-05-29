@@ -1,5 +1,6 @@
 ---
 name: "kotlin-cucumber-tests"
+version: "1.0.0"
 description: "Plan, review, or improve Kotlin Cucumber / BDD tests: decide when Cucumber fits, structure feature files, step definitions, hooks, fixtures, and Kotlin helpers, and keep domain language readable without coupling steps to implementation details. Use when the request explicitly centers on Kotlin Cucumber, Kotlin BDD, feature files, step definitions, hooks, or executable-specification tests and reviews."
 license: "MIT"
 compatibility: "opencode"

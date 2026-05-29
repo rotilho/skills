@@ -1,5 +1,6 @@
 ---
 name: "concise"
+version: "1.0.0"
 description: "Communication-mode skill for concise replies, brief updates, fewer-token rewrites, and tighter prompts. Keep normal user-facing replies readable and professional, while `caveman` mode is only for internal reasoning, agent coordination, or explicitly requested maximum-brevity output."
 license: "MIT"
 compatibility: "opencode"

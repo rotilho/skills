@@ -1,5 +1,6 @@
 ---
 name: "wiki"
+version: "1.0.0"
 description: "Organize and maintain a local wiki or repo knowledge base so durable knowledge stays clear, discoverable, linked, and easy to update over time. Use when agents need to decide where knowledge belongs, whether to update or create pages, how to name and scope pages, and how to keep notes, decisions, status, ownership, and sources consistent without heavy process."
 license: "MIT"
 compatibility: "opencode"

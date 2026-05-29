@@ -1,5 +1,6 @@
 ---
 name: "spring-application-code-style"
+version: "1.0.0"
 description: "Apply Spring Boot application-layer conventions for package structure, controllers, services, repositories, transactions, configuration properties, bean wiring, observability, and integration testing. Use when the user wants Spring application structure or Spring application architecture and wiring guidance, including coroutine or Flow usage inside Spring-managed code, especially for WebFlux or coroutine-first services, not shared libraries or framework internals. When this skill loads, also load `code-practice` as the shared engineering base layer."
 license: "MIT"
 compatibility: "opencode"
