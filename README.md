@@ -1,6 +1,6 @@
 # Skills
 
-Repo-local agent skills for OpenCode-compatible agents. They emphasize concise, procedural behavior: load the right skill, preserve trigger boundaries, make small safe edits, and verify the result.
+Global user-owned agent skills for OpenCode-compatible agents. They emphasize concise, procedural behavior: load the right skill, preserve trigger boundaries, make small safe edits, and verify the result.
 
 ## Compatibility
 
@@ -16,9 +16,11 @@ From this repo root:
 npx skills add ~/IdeaProjects/skills/ -g --all -y
 ```
 
-OpenCode can also discover skills from `.opencode/skills`, `.claude/skills`, `.agents/skills`, and global equivalents. This repo keeps the source of truth at the repo root as `<skill-name>/SKILL.md`.
+OpenCode can also discover skills from `.opencode/skills`, `.claude/skills`, `.agents/skills`, and global equivalents. This repo keeps the user-owned source of truth at the repo root as `<skill-name>/SKILL.md`.
 
 ## Skill matrix
+
+User-owned active skills:
 
 | Skill | Use when | Avoid when |
 |---|---|---|
@@ -34,6 +36,12 @@ OpenCode can also discover skills from `.opencode/skills`, `.claude/skills`, `.a
 | `skill-library-curator` | Periodic curation of global or repo-local skills, duplicate merges, promotions, embeddings, archive moves, vague skill cleanup, and curation reports. | Creating one new skill without reviewing the broader library. |
 | `spring-application-code-style` | Spring Boot application package structure, controllers, repositories, transactions, wiring, integration tests. | Plain Kotlin, framework-neutral code quality, or Spring internals/libraries. |
 | `wiki` | Maintaining durable repo wiki/knowledge-base pages and deciding where knowledge belongs. | Temporary scratch notes or research collection that should stay in `.workbench/`. |
+
+## External skills
+
+| Skill | Source | Curation rule |
+|---|---|---|
+| `humanizer` | Git submodule at `humanizer/` | Treat as externally owned. Inspect or report it during curation, but do not edit, merge, or archive it unless explicitly requested. |
 
 ## Trigger evals
 

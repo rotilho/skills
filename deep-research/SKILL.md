@@ -1,6 +1,6 @@
 ---
 name: "deep-research"
-version: "1.0.0"
+version: "1.0.1"
 description: "Run thorough, evidence-backed research or audit and refresh existing research artifacts with a gap-first workflow: inventory existing knowledge, identify only the missing high-impact gaps, verify important claims with primary sources, and synthesize a decision-useful answer with traceable evidence. Use for research-heavy comparisons, validation, or evidence-backed audits, not routine local code or prompt review."
 license: "MIT"
 compatibility: "opencode"
@@ -9,7 +9,7 @@ metadata:
   workflow: "research"
   artifact_persistence: "preferred"
   capabilities_required: "web search or web fetch access for current/public research; ability to read source content, not only snippets"
-  capabilities_optional: "parallel agents or subagents for independent research streams; file writing for research artifacts and resumable outputs; browser or API inspection for live verification"
+  capabilities_optional: "parallel agents or subagents for independent research streams when explicitly allowed by the active environment; file writing for research artifacts and resumable outputs; browser or API inspection for live verification"
 ---
 
 # Deep Research
@@ -56,7 +56,7 @@ Hard rules:
 
 ## Architecture
 
-Prefer a lead-agent plus subagent pattern when supported.
+Prefer a lead-agent plus subagent pattern only when supported and explicitly allowed by the active environment.
 
 Lead agent:
 - frame the job
@@ -97,7 +97,7 @@ Known limitations:
 
 If web search is unavailable, do not imply current external research.
 
-If subagent dispatch is unavailable, work the gaps sequentially.
+If subagent dispatch is unavailable or not explicitly allowed, work the gaps sequentially.
 
 ## Source policy
 
@@ -221,7 +221,7 @@ Each task should include:
 - best source types
 - starting queries or entry points
 - expected depth: scan | deep
-- parallel group if using subagents
+- parallel group if using explicitly allowed subagents
 - freshness risk for time-sensitive claims
 - output path if files are available
 
@@ -245,7 +245,7 @@ Compact template:
 Default sizing:
 - lightweight: 3-4 tasks
 - standard: 4-6 tasks
-- max 3 concurrent subagents per wave unless the environment clearly supports more
+- max 3 concurrent subagents per wave when subagents are explicitly allowed, unless the environment clearly supports more
 
 ### Step 4 - Breadth pass on unresolved gaps
 
@@ -352,7 +352,7 @@ Before delivery:
 
 ## Parallelism guidance
 
-If subagents are available, split by unresolved high-priority gaps, not arbitrary themes.
+If subagents are available and explicitly allowed, split by unresolved high-priority gaps, not arbitrary themes.
 
 Good splits:
 - canonical docs or primary sources

@@ -7,12 +7,13 @@ These instructions apply to this skills repository.
 ## Source of truth
 
 - Treat each root-level `<skill-name>/SKILL.md` as the source of truth for that skill.
+- Treat git submodule skills as externally owned even when they live at the repo root; inspect/report them during curation, but do not edit, merge, or archive them unless explicitly requested.
 - Keep bundled references under the owning skill folder.
 - Refresh installed skills with `npx skills add ~/IdeaProjects/skills/ -g --all -y` after changing a skill.
 
 ## Testing Skills
 
-- Test skill behavior in an isolated subagent whenever the environment supports subagents.
+- Test skill behavior in an isolated subagent whenever the environment supports subagents and active tool policy permits delegation.
 - Give the subagent only the skill path, the realistic task, and the raw artifacts or target repo it should inspect.
 - Do not pass the expected answer, prior conclusions, or known intended fixes to the subagent.
 - Ask the subagent to write any test outputs under `.workbench/<skill-name>-<target>/` or another scratch path outside the target repo.
