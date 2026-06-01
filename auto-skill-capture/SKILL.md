@@ -1,6 +1,6 @@
 ---
 name: "auto-skill-capture"
-version: "1.1.0"
+version: "1.2.0"
 description: "Create or update global or repo-local Agent Skills after complex, repeated, correction-heavy, tricky-debugging, or environment-specific work. Use near the end of substantial tasks when procedural knowledge was learned, when a user asks to capture a workflow as a skill, or when repeated corrections show that future agents need durable instructions."
 license: "MIT"
 compatibility: "opencode"
@@ -18,6 +18,7 @@ Use this skill to turn reusable procedural knowledge into a global or repo-local
 ## Reference files
 
 - Read `references/skill-writing-criteria.md` when deciding whether to create, update, or skip a skill.
+- Read `references/self-improve-example.md` as a concrete example of agent-level self-improvement policy when aligning source roots, capture criteria, curation rules, or third-party skill safety.
 - Use `templates/new-skill-template.md` when creating a new skill from scratch.
 
 ## When to use

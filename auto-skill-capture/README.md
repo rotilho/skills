@@ -8,6 +8,7 @@ Use it when a task was complex, repeated, correction-heavy, tricky to debug, or 
 
 - `SKILL.md` - compact activation and workflow instructions
 - `references/skill-writing-criteria.md` - criteria for deciding what belongs in a skill
+- `references/self-improve-example.md` - example agent-level self-improvement policy copied from `~/.agents/SELF-IMPROVE.md`
 - `templates/new-skill-template.md` - portable starting template for new skills
 
 ## Skill Locations
