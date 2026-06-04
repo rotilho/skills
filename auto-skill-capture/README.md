@@ -8,28 +8,19 @@ Use it when a task was complex, repeated, correction-heavy, tricky to debug, or 
 
 - `SKILL.md` - compact activation and workflow instructions
 - `references/skill-writing-criteria.md` - criteria for deciding what belongs in a skill
-- `references/self-improve-example.md` - example agent-level self-improvement policy copied from `~/.agents/SELF-IMPROVE.md`
+- `references/self-improve-example.md` - example agent-level self-improvement policy with local skill location bindings
 - `templates/new-skill-template.md` - portable starting template for new skills
 
 ## Skill Locations
 
-Global user-owned skills live in:
+Reusable guidance uses placeholders for skill locations:
 
-```bash
-~/IdeaProjects/skills
-```
+- `<global-skill-source>` - source checkout for reusable global/user-owned skills
+- `<repo-local-skill-source>` - repo-local source, usually `<target-repo>/.agents/skills`
+- `<installed-skill-root>` - generated installed skill locations
+- `<global-refresh-command>` - local command that syncs global skills into installed copies
 
-Repo-local skills live in:
-
-```bash
-<target-repo>/.agents/skills
-```
-
-After global changes, refresh installed skills with:
-
-```bash
-npx skills add ~/IdeaProjects/skills/ -g --all -y
-```
+Each machine's local `SELF-IMPROVE.md` should define concrete `skill_locations` bindings. Agents should resolve those bindings at runtime instead of replacing placeholders in reusable skill source.
 
 ## Usage Examples
 

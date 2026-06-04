@@ -1,6 +1,6 @@
 ---
 name: "auto-skill-capture"
-version: "1.2.0"
+version: "1.3.0"
 description: "Create or update global or repo-local Agent Skills after complex, repeated, correction-heavy, tricky-debugging, or environment-specific work. Use near the end of substantial tasks when procedural knowledge was learned, when a user asks to capture a workflow as a skill, or when repeated corrections show that future agents need durable instructions."
 license: "MIT"
 compatibility: "opencode"
@@ -18,8 +18,19 @@ Use this skill to turn reusable procedural knowledge into a global or repo-local
 ## Reference files
 
 - Read `references/skill-writing-criteria.md` when deciding whether to create, update, or skip a skill.
-- Read `references/self-improve-example.md` as a concrete example of agent-level self-improvement policy when aligning source roots, capture criteria, curation rules, or third-party skill safety.
+- Read `references/self-improve-example.md` as a concrete example of agent-level self-improvement policy when aligning local skill location bindings, capture criteria, curation rules, or third-party skill safety.
 - Use `templates/new-skill-template.md` when creating a new skill from scratch.
+
+## Local skill location bindings
+
+Before creating, updating, or installing skills, resolve these placeholders from local `skill_locations` in `SELF-IMPROVE.md` or equivalent local agent context:
+
+- `<global-skill-source>`: source checkout for reusable global/user-owned skills
+- `<repo-local-skill-source>`: repo-local source, usually `<target-repo>/.agents/skills`
+- `<installed-skill-root>`: generated installed skill locations
+- `<global-refresh-command>`: local command that syncs `<global-skill-source>` into installed skills
+
+Do not replace these placeholders inside reusable skill source files. Use the resolved local values only for actual filesystem operations, archive paths, reports, and refresh commands. If a needed binding is missing or still ambiguous, ask the user before touching files.
 
 ## When to use
 
@@ -34,8 +45,8 @@ Do not use for routine one-off work, transient project status, PR bookkeeping, o
 
 ## Hard constraints
 
-- Use `~/IdeaProjects/skills` for global user-owned skills.
-- Use `<target-repo>/.agents/skills` for repo-local skills.
+- Use `<global-skill-source>` for global user-owned skills after resolving it from local bindings.
+- Use `<repo-local-skill-source>` for repo-local skills after resolving it from local bindings.
 - Search repo-local and global source roots before creating a new skill.
 - Prefer updating an existing relevant skill in the correct scope over creating a duplicate.
 - Do not edit installed or generated copies under `~/.agents/skills`, `~/.codex/skills`, `~/.claude/skills`, `.codex/skills`, `.claude/skills`, or generated skill directories unless explicitly asked.
@@ -44,8 +55,8 @@ Do not use for routine one-off work, transient project status, PR bookkeeping, o
 - Skills are procedural memory, not completed-work logs.
 - Keep `SKILL.md` compact; move longer criteria, examples, and templates into bundled files.
 - Use valid YAML frontmatter and quote string values.
-- After changing global source skills, run `npx skills add ~/IdeaProjects/skills/ -g --all -y`.
-- For repo-local-only changes, verify the files in `<target-repo>/.agents/skills`; do not run the global install command unless a global skill also changed.
+- After changing global source skills, run the resolved `<global-refresh-command>`.
+- For repo-local-only changes, verify the files in the resolved `<repo-local-skill-source>`; do not run `<global-refresh-command>` unless a global skill also changed.
 
 ## Procedure
 
@@ -59,8 +70,8 @@ Do not use for routine one-off work, transient project status, PR bookkeeping, o
    - If the lesson may generalize later but was first learned in one repo, capture it repo-local first and let curation promote it later.
 
 3. Inventory existing skills.
-   - For repo-local scope, inspect `<target-repo>/.agents/skills` first.
-   - Inspect `~/IdeaProjects/skills` for global owners or broader duplicates.
+   - For repo-local scope, inspect the resolved `<repo-local-skill-source>` first.
+   - Inspect the resolved `<global-skill-source>` for global owners or broader duplicates.
    - Search names, descriptions, and `SKILL.md` bodies for overlapping triggers in both source roots.
    - If a good owner exists, update it instead of adding a new folder.
 
@@ -83,7 +94,7 @@ Do not use for routine one-off work, transient project status, PR bookkeeping, o
    - Check that no temporary facts, secrets, IDs, branch names, commit hashes, or logs were captured.
    - Check that repo-local details stayed in repo-local skills and global skills are not tied to one repo.
    - Run a lightweight trigger check with realistic should-trigger and should-not-trigger examples.
-   - If global skills changed, run `npx skills add ~/IdeaProjects/skills/ -g --all -y` and record whether it succeeded.
+   - If global skills changed, run the resolved `<global-refresh-command>` and record whether it succeeded.
 
 ## Pitfalls
 
@@ -100,7 +111,7 @@ Do not use for routine one-off work, transient project status, PR bookkeeping, o
 Before the final reply on substantial work, ask:
 - Did this task teach a reusable procedure or environment rule?
 - Is it global or repo-local?
-- Is there already a skill in `<target-repo>/.agents/skills` or `~/IdeaProjects/skills` that should own it?
+- Is there already a skill in the resolved `<repo-local-skill-source>` or `<global-skill-source>` that should own it?
 - Would saving it improve future agent behavior without preserving task history?
 - Did I remove private, stale, and one-off details?
 - Did I verify the skill package and run the global install command only if global skills changed?
@@ -110,5 +121,5 @@ Before the final reply on substantial work, ask:
 Report:
 - scope: `global` or `repo-local`
 - created or updated source skill paths
-- whether `npx skills add ~/IdeaProjects/skills/ -g --all -y` ran and whether it succeeded
+- whether the resolved `<global-refresh-command>` ran and whether it succeeded
 - one or two usage examples that should trigger the captured skill

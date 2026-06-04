@@ -1,49 +1,87 @@
 # Self-Improving Skills
 
-This agent should maintain reusable procedural knowledge over time. When it completes substantial work, solves a non-obvious problem, learns a stable workflow, or receives a user correction, it should consider creating or updating an Agent Skill.
+This is a portable example for a local agent-level self-improvement policy.
 
-Skills are procedural memory. They are reusable workflows, commands, pitfalls, verification steps, and stable environment or project conventions.
+Use it as the starting point for a machine-local file such as:
 
-Skills are not task logs. Do not save temporary progress, PR numbers, issue numbers, commit hashes, branch names, one-off outcomes, secrets, credentials, private user data, or facts likely to become stale within a week.
+```text
+~/.agents/SELF-IMPROVE.md
+```
+
+The reusable skill source should keep placeholders such as `<global-skill-source>`.
+The local `SELF-IMPROVE.md` should define concrete `skill_locations` bindings so
+agents can resolve those placeholders at runtime.
+
+## Installing This Policy Locally
+
+When the user asks to install, enable, or set up self-improving skills:
+
+1. Copy this file to the local agent instruction location, usually `~/.agents/SELF-IMPROVE.md`, unless the user names another location.
+2. Fill `skill_locations` with concrete paths and commands for the current machine.
+3. If any required value is unknown, ask the user before continuing.
+4. Do not replace placeholders inside reusable skill source files.
+5. Use the local bindings at runtime when a skill says `<global-skill-source>`, `<repo-local-skill-source>`, `<installed-skill-root>`, or `<global-refresh-command>`.
+
+Useful setup prompt:
+
+```text
+Install the self-improvement policy from auto-skill-capture/references/self-improve-example.md.
+Copy it to the right local instruction file and fill the skill_locations bindings for this machine.
+```
+
+## Local Skill Location Bindings
+
+Each machine should define these bindings in its local `SELF-IMPROVE.md`.
+
+Home-machine example:
+
+```yaml
+skill_locations:
+  global-skill-source: "~/IdeaProjects/skills"
+  repo-local-skill-source: "<target-repo>/.agents/skills"
+  installed-skill-roots:
+    - "~/.agents/skills"
+    - "~/.codex/skills"
+    - "~/.claude/skills"
+  global-refresh-command: "npx skills add ~/IdeaProjects/skills/ -g --all -y"
+```
+
+Work-machine example:
+
+```yaml
+skill_locations:
+  global-skill-source: "<work-skills-source>"
+  repo-local-skill-source: "<target-repo>/.agents/skills"
+  installed-skill-roots:
+    - "<work-installed-skills-root>"
+  global-refresh-command: "<work-refresh-command>"
+```
+
+Resolution rules:
+
+- Treat `global-skill-source`, `repo-local-skill-source`, `installed-skill-roots`, and `global-refresh-command` as local bindings, not text-replacement instructions.
+- Keep placeholders in reusable skill source files so the skills remain portable across machines.
+- Before creating, updating, curating, archiving, or installing skills, resolve placeholders from the local bindings.
+- Use resolved values for actual filesystem operations, archive paths, reports, and commands.
+- If a binding is missing or still points at an unresolved placeholder when a concrete operation is needed, ask the user.
 
 ## Skill Source Roots
 
-The global source of user-owned skills is:
+Use `<global-skill-source>` for global user-owned skills.
 
-```text
-~/IdeaProjects/skills
-```
-
-The repo-local source of user-owned skills is:
-
-```text
-<target-repo>/.agents/skills
-```
+Use `<repo-local-skill-source>` for repo-local user-owned skills.
 
 Use global skills for reusable procedures that apply across repos, tools, or workflows. Use repo-local skills for procedures that depend on one repo's structure, scripts, product language, deployment topology, test fixtures, or ownership boundaries.
 
-Do not directly edit installed/generated skill copies under:
-
-- `~/.agents/skills/`
-- `~/.codex/skills/`
-- `~/.claude/skills/`
-- `.codex/skills/`
-- `.claude/skills/`
-- generated skill directories
-
-unless the user explicitly asks.
+Do not directly edit installed/generated skill copies under `<installed-skill-root>` unless the user explicitly asks.
 
 Instead:
 
-1. Make global skill source changes under `~/IdeaProjects/skills`.
-2. Make repo-local skill source changes under `<target-repo>/.agents/skills`.
-3. After creating, updating, merging, promoting, embedding, or archiving global skills, run the canonical refresh command:
+1. Make global skill source changes under the resolved `<global-skill-source>`.
+2. Make repo-local skill source changes under the resolved `<repo-local-skill-source>`.
+3. After creating, updating, merging, promoting, embedding, or archiving global skills, run the resolved `<global-refresh-command>`.
 
-```bash
-npx skills add ~/IdeaProjects/skills/ -g --all -y
-```
-
-This installs/syncs the global skill source into the agent-specific skill locations. Later sections refer to this as the canonical refresh command.
+Repo-local-only changes do not require the global refresh command.
 
 ## Skill Source Editing Rules
 
@@ -51,54 +89,25 @@ When asked to create a new skill:
 
 - Choose global scope when the skill is reusable across repos.
 - Choose repo-local scope when the skill is tied to the current repo.
-- Create global skills under `~/IdeaProjects/skills`.
-- Create repo-local skills under `<target-repo>/.agents/skills`.
-- Run the canonical refresh command only when global skills changed.
+- Create global skills under the resolved `<global-skill-source>`.
+- Create repo-local skills under the resolved `<repo-local-skill-source>`.
+- Run the resolved `<global-refresh-command>` only when global skills changed.
 
 When asked to update, rewrite, merge, or curate an existing skill:
 
-- First check whether that skill exists under the current repo's `.agents/skills`.
-- Then check whether it exists under `~/IdeaProjects/skills`.
+- First check whether that skill exists under the resolved `<repo-local-skill-source>`.
+- Then check whether it exists under the resolved `<global-skill-source>`.
 - Edit the source copy in the correct scope.
-- Run the canonical refresh command only when global skills changed.
+- Run the resolved `<global-refresh-command>` only when global skills changed.
 
 If a skill exists only in an installed/generated location but does not exist under the correct repo-local or global source root:
 
 - Do not modify the installed/generated copy.
 - Treat it as non-canonical.
 - If a change is needed, create or import a source version under the correct repo-local or global root first.
-- Run the canonical refresh command only when global skills changed.
+- Run the resolved `<global-refresh-command>` only when global skills changed.
 
-If `~/IdeaProjects/skills` or `<target-repo>/.agents/skills` does not exist and is the selected source root, create it before creating new skills.
-
-## Skill Roots
-
-For global user-owned skills, the source root is:
-
-```text
-~/IdeaProjects/skills
-```
-
-For repo-local user-owned skills, the source root is:
-
-```text
-<target-repo>/.agents/skills
-```
-
-Installed skill directories are deployment targets, not source-of-truth locations.
-
-The agent may inspect installed skill directories to understand what is currently available, but should not modify them directly unless explicitly asked.
-
-After changing global skills under `~/IdeaProjects/skills`, run the canonical refresh command. Repo-local-only changes do not require the global refresh command.
-
-A skill is a directory containing `SKILL.md`.
-
-Skill support files may live under:
-
-- `references/`
-- `templates/`
-- `scripts/`
-- `assets/`
+If the resolved `<global-skill-source>` or `<repo-local-skill-source>` does not exist and is the selected source root, create it before creating new skills.
 
 ## End-of-Task Self-Improvement
 
@@ -108,7 +117,7 @@ Create or update a skill when any of these are true:
 
 - The task required 5 or more meaningful steps.
 - A tricky or non-obvious error was solved.
-- The user corrected the agent’s approach.
+- The user corrected the agent's approach.
 - A reusable workflow was discovered.
 - A stable project, tool, API, or environment convention was learned.
 - The same kind of task is likely to recur.
@@ -124,7 +133,7 @@ Do not create or update a skill when:
 - The knowledge is generic and already obvious.
 - The skill would duplicate an existing skill.
 
-Before creating a new skill, search existing skills by name and content in both the current repo's `.agents/skills` and `~/IdeaProjects/skills`. Prefer patching an existing skill in the correct scope over creating a duplicate.
+Before creating a new skill, search existing skills by name and content in both the resolved `<repo-local-skill-source>` and `<global-skill-source>`. Prefer patching an existing skill in the correct scope over creating a duplicate.
 
 ## Skill Creation
 
@@ -181,8 +190,8 @@ Periodically, or when asked to clean up skills, curate the skill library.
 
 Curation scope:
 
-- Modify global skills under `~/IdeaProjects/skills`.
-- Modify repo-local skills under `<target-repo>/.agents/skills`.
+- Modify global skills under the resolved `<global-skill-source>`.
+- Modify repo-local skills under the resolved `<repo-local-skill-source>`.
 - Do not curate, rewrite, merge, archive, or delete skills from installed/generated locations unless explicitly requested.
 
 Curation goals:
@@ -213,8 +222,8 @@ Never permanently delete a skill during curation. Archive it instead.
 Archive path format:
 
 ```text
-~/IdeaProjects/skills/.archive/YYYY-MM-DD/<skill-name>/
-<target-repo>/.agents/skills/.archive/YYYY-MM-DD/<skill-name>/
+<global-skill-source>/.archive/YYYY-MM-DD/<skill-name>/
+<repo-local-skill-source>/.archive/YYYY-MM-DD/<skill-name>/
 ```
 
 When archiving, preserve the complete skill package:
@@ -229,29 +238,7 @@ When archiving, preserve the complete skill package:
 
 Add `ARCHIVE_NOTE.md` explaining why the skill was archived, when it was archived, and where it was merged if applicable.
 
-After curation, run the canonical refresh command only when global skills changed.
-
-## Merge Policy
-
-When two skills overlap:
-
-1. Choose the broader, clearer, better-maintained skill as the merge target.
-2. Move useful procedures, pitfalls, examples, and verification steps into the target.
-3. Preserve and re-home needed support files.
-4. Rewrite relative links after moving files.
-5. Archive the absorbed skill rather than deleting it.
-6. Add a note to the archived skill explaining the merge target.
-7. Run the canonical refresh command after the merge only when global skills changed.
-
-Do not flatten a skill package by copying only `SKILL.md` while losing its references, templates, scripts, or assets.
-
-## Promotion And Embedding
-
-During curation, a repo-local skill may be promoted to global when its procedure applies across repos after removing repo-specific paths, product language, commands, ownership facts, and temporary context.
-
-A skill may be embedded into another skill when it is only a caveat, workflow variant, pitfall, or verification step for the target skill.
-
-Do not promote private, repo-bound, or product-specific details into global skills. If promotion or embedding is not clearly safe, keep both skills active and report `needs-human-review`.
+After curation, run the resolved `<global-refresh-command>` only when global skills changed.
 
 ## Third-Party Skill Safety
 
@@ -267,52 +254,18 @@ Treat a skill as third-party or vendor-owned if:
 
 For third-party skills, prefer creating a local wrapper or companion skill under the correct repo-local or global source root instead of editing the original.
 
-## Scheduled Skill Maintenance
-
-When running periodic skill maintenance, use this workflow:
-
-1. Locate the global skills root at `~/IdeaProjects/skills`.
-2. Locate repo-local skills at `<target-repo>/.agents/skills` when curating a specific repo.
-3. Inventory every skill directory containing `SKILL.md` in the selected roots.
-4. Detect third-party/vendor/package-managed skills and mark them read-only unless explicitly requested.
-5. Classify each user-owned skill as keep, patch, merge, promote, embed, archive, or needs-human-review.
-6. Apply low-risk patches first.
-7. Merge, promote, or embed only when the target is obvious and safe.
-8. Archive instead of deleting.
-9. Preserve full skill packages when moving, merging, promoting, or embedding.
-10. Validate frontmatter, links, and referenced support files.
-11. Run the canonical refresh command after global changes.
-12. Write a curation report.
-
-The curation report should include:
-
-- Summary
-- Skills inspected
-- Skills kept
-- Skills patched
-- Skills merged
-- Skills promoted
-- Skills embedded
-- Skills archived
-- Skills skipped
-- Human review needed
-- Validation results
-- Follow-up recommendations
-
-Before making broad changes affecting more than 5 skills, stop and produce a proposed plan instead of applying changes.
-
 ## Automatic Behavior
 
 Act proactively. If a task clearly produced reusable procedural knowledge, create or update the relevant skill before finishing.
 
-If the change is low-risk and local to user-owned skills under `~/IdeaProjects/skills` or `<target-repo>/.agents/skills`, apply it directly. Run the canonical refresh command only when global skills changed.
+If the change is low-risk and local to user-owned skills under the resolved `<global-skill-source>` or `<repo-local-skill-source>`, apply it directly. Run the resolved `<global-refresh-command>` only when global skills changed.
 
 Ask before making broad or destructive changes, including:
 
-- archiving many skills,
-- modifying third-party skills,
-- rewriting a large skill library,
-- changing executable scripts,
-- deleting anything permanently.
+- archiving many skills
+- modifying third-party skills
+- rewriting a large skill library
+- changing executable scripts
+- deleting anything permanently
 
 Prefer patching existing skills over creating new skills. Prefer creating reusable procedural knowledge over saving task-specific logs.

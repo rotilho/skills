@@ -18,7 +18,7 @@ Use this skill to [one-sentence procedural purpose].
 ## Scope
 
 - Scope: `[global-or-repo-local]`
-- Source root: `[~/IdeaProjects/skills or <target-repo>/.agents/skills]`
+- Source root: `[<global-skill-source> or <repo-local-skill-source>]`
 - Repo assumptions: `[for repo-local skills only; remove this line for global skills]`
 
 ## Reference files
