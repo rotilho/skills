@@ -1,7 +1,7 @@
 ---
 name: "skill-library-curator"
-version: "1.1.0"
-description: "Review, improve, merge, promote, embed, deduplicate, and archive global or repo-local Agent Skills. Use for periodic skill library curation in ~/IdeaProjects/skills or <repo>/.agents/skills, vague or outdated skill cleanup, duplicate consolidation, archive planning, and curation reports."
+version: "1.2.0"
+description: "Review, improve, merge, promote, embed, deduplicate, and archive global or repo-local Agent Skills. Use for periodic skill library curation in a resolved <global-skill-source> or <repo-local-skill-source>, vague or outdated skill cleanup, duplicate consolidation, archive planning, and curation reports."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -34,10 +34,21 @@ Trigger for work like:
 
 Do not use for creating one new skill from a fresh workflow unless the task also asks to review or curate the broader library.
 
+## Local skill location bindings
+
+Before curating, resolve these placeholders from local `skill_locations` in `SELF-IMPROVE.md` or equivalent local agent context:
+
+- `<global-skill-source>`: source checkout for reusable global/user-owned skills
+- `<repo-local-skill-source>`: repo-local source, usually `<target-repo>/.agents/skills`
+- `<installed-skill-root>`: generated installed skill locations
+- `<global-refresh-command>`: local command that syncs `<global-skill-source>` into installed skills
+
+Do not replace these placeholders inside reusable skill source files. Use the resolved local values only for actual filesystem operations, archive paths, reports, and refresh commands. If a needed binding is missing or still ambiguous, ask the user before touching files.
+
 ## Hard constraints
 
-- Treat `~/IdeaProjects/skills` as the global user-owned skills source.
-- Treat `<target-repo>/.agents/skills` as the repo-local user-owned skills source.
+- Treat the resolved `<global-skill-source>` as the global user-owned skills source.
+- Treat the resolved `<repo-local-skill-source>` as the repo-local user-owned skills source.
 - Inspect the requested source root before modifying anything.
 - Do not modify vendor, bundled, third-party, registry-installed, package-managed, or git-submodule skills unless explicitly requested.
 - Do not edit installed or generated copies under `~/.agents/skills`, `~/.codex/skills`, `~/.claude/skills`, `.codex/skills`, `.claude/skills`, or generated skill directories unless explicitly asked.
@@ -46,18 +57,18 @@ Do not use for creating one new skill from a fresh workflow unless the task also
 - Promote repo-local skills to global only when their reusable content is no longer repo-bound.
 - Embed a skill into another skill when it is only a caveat, workflow variant, pitfall, or verification step for the target.
 - Never delete a skill immediately; archive instead.
-- Archive full global skill packages under `~/IdeaProjects/skills/.archive/YYYY-MM-DD/<skill-name>/`.
-- Archive full repo-local skill packages under `<target-repo>/.agents/skills/.archive/YYYY-MM-DD/<skill-name>/`.
+- Archive full global skill packages under the resolved `<global-skill-source>/.archive/YYYY-MM-DD/<skill-name>/`.
+- Archive full repo-local skill packages under the resolved `<repo-local-skill-source>/.archive/YYYY-MM-DD/<skill-name>/`.
 - Preserve `SKILL.md`, `README.md`, `references/`, `templates/`, `scripts/`, `assets/`, and any other support files when archiving.
 - Produce a curation report after changes.
-- After global changes, run `npx skills add ~/IdeaProjects/skills/ -g --all -y`.
+- After global changes, run the resolved `<global-refresh-command>`.
 - For repo-local-only changes, verify files and report that no global install was needed.
 
 ## Procedure
 
 1. Choose curation mode.
-   - `global`: inspect and change `~/IdeaProjects/skills`.
-   - `repo-local`: inspect and change `<target-repo>/.agents/skills`.
+   - `global`: inspect and change the resolved `<global-skill-source>`.
+   - `repo-local`: inspect and change the resolved `<repo-local-skill-source>`.
    - `mixed`: inspect both roots when deciding whether a local skill should stay local, promote to global, or embed into another skill.
 
 2. Inventory the library.
@@ -98,7 +109,7 @@ Do not use for creating one new skill from a fresh workflow unless the task also
    - Check frontmatter names match folder names for active skills.
    - Check no active duplicate names remain.
    - Check archived skills are complete packages.
-   - Run `npx skills add ~/IdeaProjects/skills/ -g --all -y` only if global skills changed.
+   - Run the resolved `<global-refresh-command>` only if global skills changed.
 
 8. Report the outcome.
    - Use the curation report template.
@@ -122,4 +133,4 @@ Do not use for creating one new skill from a fresh workflow unless the task also
 - Promoted global content is free of repo-only assumptions.
 - Archived packages include all original support files.
 - The curation report names what changed and why.
-- `npx skills add ~/IdeaProjects/skills/ -g --all -y` was run and recorded when global skills changed, or the report states that no global install was needed.
+- The resolved `<global-refresh-command>` was run and recorded when global skills changed, or the report states that no global install was needed.

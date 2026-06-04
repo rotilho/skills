@@ -2,9 +2,9 @@
 
 Date: [YYYY-MM-DD]
 Scope: [global | repo-local | mixed]
-Roots:
-- Global: `~/IdeaProjects/skills`
-- Repo-local: `[<target-repo>/.agents/skills or not inspected]`
+Resolved roots:
+- Global: `[resolved <global-skill-source>]`
+- Repo-local: `[resolved <repo-local-skill-source> or not inspected]`
 
 ## Summary
 
@@ -15,7 +15,7 @@ Roots:
 - Embedded: [count]
 - Archived: [count]
 - Excluded: [count]
-- Install result: [`npx skills add ~/IdeaProjects/skills/ -g --all -y` succeeded, failed with short reason, or not needed]
+- Install result: [`<global-refresh-command>` resolved to command and succeeded, failed with short reason, or not needed]
 
 ## Inspected Skills
 
@@ -39,7 +39,7 @@ Roots:
 
 | Source Skill | Global Target | Reason | Archive Path |
 |---|---|---|---|
-| [repo-local-skill] | [global-skill] | [why promotion was safe] | `[repo]/.agents/skills/.archive/[YYYY-MM-DD]/[skill-name]/` |
+| [repo-local-skill] | [global-skill] | [why promotion was safe] | `[resolved <repo-local-skill-source>]/.archive/[YYYY-MM-DD]/[skill-name]/` |
 
 ## Embeddings
 

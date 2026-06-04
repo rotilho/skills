@@ -53,13 +53,13 @@ Promote repo-local content to global only when the reusable procedure works outs
 1. Read the full repo-local package and candidate global targets.
 2. Remove repo-specific paths, product-only language, secrets, temporary facts, branch names, commit hashes, PR numbers, and issue numbers.
 3. Choose one target:
-   - create `~/IdeaProjects/skills/<skill-name>/` when the workflow deserves a standalone global skill
+   - create `<global-skill-source>/<skill-name>/` after resolving the binding when the workflow deserves a standalone global skill
    - update an existing global skill when the content is a natural extension of that skill
 4. Move or adapt only reusable references, templates, scripts, and assets that still make sense globally.
 5. Update global trigger boundaries so the promoted content is discoverable without becoming vague.
-6. Archive the repo-local source package under `<target-repo>/.agents/skills/.archive/YYYY-MM-DD/<skill-name>/`.
+6. Archive the repo-local source package under the resolved `<repo-local-skill-source>/.archive/YYYY-MM-DD/<skill-name>/`.
 7. Add `ARCHIVE_NOTE.md` in the archived package explaining the global target and promotion reason.
-8. Run `npx skills add ~/IdeaProjects/skills/ -g --all -y`.
+8. Run the resolved `<global-refresh-command>`.
 9. Record the promotion in the curation report.
 
 ## Embedding Procedure
@@ -81,13 +81,13 @@ Embed a skill when its reusable content is too small or overlapping to justify a
 Archive full global packages under:
 
 ```text
-~/IdeaProjects/skills/.archive/YYYY-MM-DD/<skill-name>/
+<global-skill-source>/.archive/YYYY-MM-DD/<skill-name>/
 ```
 
 Archive full repo-local packages under:
 
 ```text
-<target-repo>/.agents/skills/.archive/YYYY-MM-DD/<skill-name>/
+<repo-local-skill-source>/.archive/YYYY-MM-DD/<skill-name>/
 ```
 
 Preserve all files from the original package:
@@ -124,4 +124,4 @@ After merging, promoting, embedding, or archiving:
 - archived package is complete
 - no active duplicate remains for the same workflow
 - promoted global content has no repo-only assumptions
-- `npx skills add ~/IdeaProjects/skills/ -g --all -y` has been run when global skills changed
+- The resolved `<global-refresh-command>` has been run when global skills changed

@@ -6,8 +6,8 @@ Use this policy when reviewing global or repo-local user-owned skills.
 
 Curate only the selected source roots:
 
-- Global skills: `~/IdeaProjects/skills`
-- Repo-local skills: `<target-repo>/.agents/skills`
+- Global skills: resolved `<global-skill-source>`
+- Repo-local skills: resolved `<repo-local-skill-source>`
 
 Use mixed curation when deciding whether a repo-local skill should stay local, promote to global, or embed into another skill.
 
@@ -67,7 +67,7 @@ Do not promote when:
 - the skill contains private, secret, customer, incident, branch, commit, PR, or issue details
 - removing repo-specific context would make the guidance vague
 
-When promotion succeeds, archive the repo-local source package under `<target-repo>/.agents/skills/.archive/YYYY-MM-DD/<skill-name>/` and add an `ARCHIVE_NOTE.md` naming the global target.
+When promotion succeeds, archive the repo-local source package under the resolved `<repo-local-skill-source>/.archive/YYYY-MM-DD/<skill-name>/` and add an `ARCHIVE_NOTE.md` naming the global target.
 
 ## Embedding Rules
 
@@ -77,7 +77,7 @@ Embed a skill into another skill when:
 - keeping it standalone creates trigger noise or duplicate maintenance
 - its support files can either move cleanly into the target or stay preserved in the archive
 
-Embed into a global target only when the reusable content is not repo-bound. Otherwise, embed into a repo-local target in `<target-repo>/.agents/skills`.
+Embed into a global target only when the reusable content is not repo-bound. Otherwise, embed into a repo-local target in the resolved `<repo-local-skill-source>`.
 
 ## Patch Rules
 
