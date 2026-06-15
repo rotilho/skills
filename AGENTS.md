@@ -9,7 +9,8 @@ These instructions apply to this skills repository.
 - Treat each root-level `<skill-name>/SKILL.md` as the source of truth for that skill.
 - Treat git submodule skills as externally owned even when they live at the repo root; inspect/report them during curation, but do not edit, merge, or archive them unless explicitly requested.
 - Keep bundled references under the owning skill folder.
-- Refresh installed skills with `npx skills add ~/IdeaProjects/skills/ -g --all -y` after changing a skill.
+- Refresh installed universal skills with `npx skills add ~/IdeaProjects/skills/ -g --agent universal --skill '*' -y` after changing a global skill.
+- Do not use `--all` for refreshes; it installs to every supported agent.
 
 ## Testing Skills
 

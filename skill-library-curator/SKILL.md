@@ -1,6 +1,6 @@
 ---
 name: "skill-library-curator"
-version: "1.2.0"
+version: "1.2.1"
 description: "Review, improve, merge, promote, embed, deduplicate, and archive global or repo-local Agent Skills. Use for periodic skill library curation in a resolved <global-skill-source> or <repo-local-skill-source>, vague or outdated skill cleanup, duplicate consolidation, archive planning, and curation reports."
 license: "MIT"
 compatibility: "opencode"
@@ -40,8 +40,8 @@ Before curating, resolve these placeholders from local `skill_locations` in `SEL
 
 - `<global-skill-source>`: source checkout for reusable global/user-owned skills
 - `<repo-local-skill-source>`: repo-local source, usually `<target-repo>/.agents/skills`
-- `<installed-skill-root>`: generated installed skill locations
-- `<global-refresh-command>`: local command that syncs `<global-skill-source>` into installed skills
+- `<installed-skill-root>`: configured generated installed skill locations
+- `<global-refresh-command>`: local command that syncs `<global-skill-source>` into the configured installed skill targets
 
 Do not replace these placeholders inside reusable skill source files. Use the resolved local values only for actual filesystem operations, archive paths, reports, and refresh commands. If a needed binding is missing or still ambiguous, ask the user before touching files.
 
@@ -62,6 +62,7 @@ Do not replace these placeholders inside reusable skill source files. Use the re
 - Preserve `SKILL.md`, `README.md`, `references/`, `templates/`, `scripts/`, `assets/`, and any other support files when archiving.
 - Produce a curation report after changes.
 - After global changes, run the resolved `<global-refresh-command>`.
+- Do not broaden refresh scope with CLI shortcuts such as `--all`; use the resolved command exactly.
 - For repo-local-only changes, verify files and report that no global install was needed.
 
 ## Procedure

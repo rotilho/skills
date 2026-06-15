@@ -13,8 +13,10 @@ Global user-owned agent skills for OpenCode-compatible agents. They emphasize co
 From this repo root:
 
 ```bash
-npx skills add ~/IdeaProjects/skills/ -g --all -y
+npx skills add https://github.com/rotilho/skills -g --agent universal --skill '*' -y
 ```
+
+This intentionally targets only the universal agent. Do not use `--all` for routine refreshes; in the `skills` CLI it expands to all skills for all supported agents.
 
 OpenCode can also discover skills from `.opencode/skills`, `.claude/skills`, `.agents/skills`, and global equivalents. This repo keeps the user-owned source of truth at the repo root as `<skill-name>/SKILL.md`.
 

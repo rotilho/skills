@@ -17,8 +17,8 @@ Reusable guidance uses placeholders for skill locations:
 
 - `<global-skill-source>` - source checkout for reusable global/user-owned skills
 - `<repo-local-skill-source>` - repo-local source, usually `<target-repo>/.agents/skills`
-- `<installed-skill-root>` - generated installed skill locations
-- `<global-refresh-command>` - local command that syncs global skills into installed copies
+- `<installed-skill-root>` - configured generated installed skill locations
+- `<global-refresh-command>` - local command that syncs global skills into the configured installed targets
 
 Each machine's local `SELF-IMPROVE.md` should define concrete `skill_locations` bindings. Agents should resolve those bindings at runtime instead of replacing placeholders in reusable skill source.
 

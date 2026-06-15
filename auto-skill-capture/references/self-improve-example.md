@@ -41,10 +41,10 @@ skill_locations:
   repo-local-skill-source: "<target-repo>/.agents/skills"
   installed-skill-roots:
     - "~/.agents/skills"
-    - "~/.codex/skills"
-    - "~/.claude/skills"
-  global-refresh-command: "npx skills add ~/IdeaProjects/skills/ -g --all -y"
+  global-refresh-command: "npx skills add ~/IdeaProjects/skills/ -g --agent universal --skill '*' -y"
 ```
+
+This example intentionally refreshes only the universal agent. Do not replace it with `--all` unless the user explicitly wants every supported agent updated.
 
 Work-machine example:
 
@@ -63,6 +63,7 @@ Resolution rules:
 - Keep placeholders in reusable skill source files so the skills remain portable across machines.
 - Before creating, updating, curating, archiving, or installing skills, resolve placeholders from the local bindings.
 - Use resolved values for actual filesystem operations, archive paths, reports, and commands.
+- Run the resolved command exactly; do not broaden a universal-only refresh into an all-agent install.
 - If a binding is missing or still points at an unresolved placeholder when a concrete operation is needed, ask the user.
 
 ## Skill Source Roots

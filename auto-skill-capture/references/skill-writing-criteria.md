@@ -8,9 +8,11 @@ Resolve local `skill_locations` bindings before creating or updating skills:
 
 - `<global-skill-source>` for global skills when the procedure is reusable across multiple repos, tools, agents, or workflows.
 - `<repo-local-skill-source>` for repo-local skills when the procedure depends on one repo's structure, scripts, product language, deployment topology, test fixtures, or ownership boundaries.
-- `<global-refresh-command>` for syncing global source skills into installed skill roots after global changes.
+- `<global-refresh-command>` for syncing global source skills into the configured installed skill targets after global changes.
 
 Do not replace placeholders inside reusable skill source files. For actual file operations, archive paths, verification commands, and final reports, use the resolved local values from `SELF-IMPROVE.md` or equivalent local agent context. If a needed binding is missing, ask the user before touching files.
+
+Run the resolved `<global-refresh-command>` exactly. Do not broaden a universal-only refresh into an all-agent install with CLI shortcuts such as `--all`.
 
 Default to repo-local when a lesson was learned in one repo and might generalize later but still contains repo assumptions. A later curation pass can promote it after those assumptions are removed.
 
@@ -113,7 +115,7 @@ Before installing, check:
 - trigger examples include should-use and should-not-use prompts
 - global skills are free of repo-only assumptions
 - repo-local skills name the repo assumptions they depend on
-- the resolved `<global-refresh-command>` was run after global changes
+- the resolved `<global-refresh-command>` was run after global changes, with its intended agent scope preserved
 
 ## Example Transformation
 

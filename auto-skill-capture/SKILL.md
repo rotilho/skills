@@ -1,6 +1,6 @@
 ---
 name: "auto-skill-capture"
-version: "1.3.0"
+version: "1.3.1"
 description: "Create or update global or repo-local Agent Skills after complex, repeated, correction-heavy, tricky-debugging, or environment-specific work. Use near the end of substantial tasks when procedural knowledge was learned, when a user asks to capture a workflow as a skill, or when repeated corrections show that future agents need durable instructions."
 license: "MIT"
 compatibility: "opencode"
@@ -27,8 +27,8 @@ Before creating, updating, or installing skills, resolve these placeholders from
 
 - `<global-skill-source>`: source checkout for reusable global/user-owned skills
 - `<repo-local-skill-source>`: repo-local source, usually `<target-repo>/.agents/skills`
-- `<installed-skill-root>`: generated installed skill locations
-- `<global-refresh-command>`: local command that syncs `<global-skill-source>` into installed skills
+- `<installed-skill-root>`: configured generated installed skill locations
+- `<global-refresh-command>`: local command that syncs `<global-skill-source>` into the configured installed skill targets
 
 Do not replace these placeholders inside reusable skill source files. Use the resolved local values only for actual filesystem operations, archive paths, reports, and refresh commands. If a needed binding is missing or still ambiguous, ask the user before touching files.
 
@@ -56,6 +56,7 @@ Do not use for routine one-off work, transient project status, PR bookkeeping, o
 - Keep `SKILL.md` compact; move longer criteria, examples, and templates into bundled files.
 - Use valid YAML frontmatter and quote string values.
 - After changing global source skills, run the resolved `<global-refresh-command>`.
+- Do not broaden refresh scope with CLI shortcuts such as `--all`; use the resolved command exactly.
 - For repo-local-only changes, verify the files in the resolved `<repo-local-skill-source>`; do not run `<global-refresh-command>` unless a global skill also changed.
 
 ## Procedure
