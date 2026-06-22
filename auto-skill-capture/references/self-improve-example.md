@@ -88,8 +88,8 @@ Repo-local-only changes do not require the global refresh command.
 
 When asked to create a new skill:
 
-- Choose global scope when the skill is reusable across repos.
-- Choose repo-local scope when the skill is tied to the current repo.
+- Choose global placement when the skill is reusable across repos.
+- Choose repo-local placement when the skill is tied to the current repo.
 - Create global skills under the resolved `<global-skill-source>`.
 - Create repo-local skills under the resolved `<repo-local-skill-source>`.
 - Run the resolved `<global-refresh-command>` only when global skills changed.
@@ -98,7 +98,7 @@ When asked to update, rewrite, merge, or curate an existing skill:
 
 - First check whether that skill exists under the resolved `<repo-local-skill-source>`.
 - Then check whether it exists under the resolved `<global-skill-source>`.
-- Edit the source copy in the correct scope.
+- Edit the source copy in the correct source root.
 - Run the resolved `<global-refresh-command>` only when global skills changed.
 
 If a skill exists only in an installed/generated location but does not exist under the correct repo-local or global source root:
@@ -134,7 +134,7 @@ Do not create or update a skill when:
 - The knowledge is generic and already obvious.
 - The skill would duplicate an existing skill.
 
-Before creating a new skill, search existing skills by name and content in both the resolved `<repo-local-skill-source>` and `<global-skill-source>`. Prefer patching an existing skill in the correct scope over creating a duplicate.
+Before creating a new skill, search existing skills by name and content in both the resolved `<repo-local-skill-source>` and `<global-skill-source>`. Prefer patching an existing skill in the correct source root over creating a duplicate.
 
 ## Skill Creation
 
@@ -144,7 +144,7 @@ Every `SKILL.md` should include:
 
 - YAML frontmatter with `name`, `version`, `description`, `license`, `compatibility`, and `metadata`.
 - A quoted semantic `version` string, bumped when the skill behavior changes.
-- Scope metadata or clear scope guidance when global vs repo-local matters.
+- Repo assumptions only when they affect how the skill should be used.
 - Clear trigger conditions.
 - When not to use.
 - Prerequisites.

@@ -33,6 +33,7 @@ User-owned active skills:
 | `create-skill` | Creating, rewriting, or evaluating agent skills and trigger boundaries. | The task is ordinary docs/code work rather than reusable skill behavior. |
 | `deep-research` | Evidence-backed research, comparisons, audits, and gap-first source validation. | Routine local code or prompt review with no research need. |
 | `design-extractor` | Create or audit `DESIGN.md` from screenshots, Figma, CSS, tokens, brand notes, or app references, including evidence counts and conflicts. | Ordinary frontend implementation when no durable `DESIGN.md` or design extraction is requested. |
+| `ephemeral-container-workbench` | Running one-off tools, converters, SDKs, or package installs in a temporary Podman/Docker container instead of mutating the host. | The repo already owns the toolchain, a long-lived service is needed, or the user wants the dependency installed locally. |
 | `kotlin-code-style` | Kotlin file/type organization, nullability, extensions, coroutines, Flow, tests. | Spring architecture or Cucumber/BDD is central. |
 | `kotlin-cucumber-tests` | Kotlin Cucumber feature files, steps, hooks, fixtures, and executable specs. | Generic unit tests, plain Kotlin style, or Spring test architecture. |
 | `skill-library-curator` | Periodic curation of global or repo-local skills, duplicate merges, promotions, embeddings, archive moves, vague skill cleanup, and curation reports. | Creating one new skill without reviewing the broader library. |

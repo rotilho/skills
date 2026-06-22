@@ -2,7 +2,7 @@
 
 Use this reference when deciding whether a recent task should become a reusable skill and how to shape the result.
 
-## Global vs Repo-Local Capture
+## Global vs Repo-Local Placement
 
 Resolve local `skill_locations` bindings before creating or updating skills:
 
@@ -10,9 +10,11 @@ Resolve local `skill_locations` bindings before creating or updating skills:
 - `<repo-local-skill-source>` for repo-local skills when the procedure depends on one repo's structure, scripts, product language, deployment topology, test fixtures, or ownership boundaries.
 - `<global-refresh-command>` for syncing global source skills into the configured installed skill targets after global changes.
 
-Do not replace placeholders inside reusable skill source files. For actual file operations, archive paths, verification commands, and final reports, use the resolved local values from `SELF-IMPROVE.md` or equivalent local agent context. If a needed binding is missing, ask the user before touching files.
+Keep placeholders inside reusable skill source files. For actual file operations, archive paths, verification commands, and final reports, use the resolved local values from `SELF-IMPROVE.md` or equivalent local agent context. If a needed binding is missing, ask the user before touching files.
 
-Run the resolved `<global-refresh-command>` exactly. Do not broaden a universal-only refresh into an all-agent install with CLI shortcuts such as `--all`.
+Run the resolved `<global-refresh-command>` exactly, preserving the intended universal-only target.
+
+Treat global vs repo-local as a source-root placement decision. Keep skill content focused on the reusable procedure, and omit placement bookkeeping such as `metadata.scope` or a `## Scope` section.
 
 Default to repo-local when a lesson was learned in one repo and might generalize later but still contains repo assumptions. A later curation pass can promote it after those assumptions are removed.
 
@@ -64,7 +66,7 @@ Update an existing skill when:
 - the new behavior fits the same trigger boundary
 - users would expect one skill to cover both workflows
 - the new lesson is a caveat, pitfall, or verification step for an existing procedure
-- the existing skill in the correct scope already owns the workflow
+- the existing skill in the correct source root already owns the workflow
 
 Create a new skill when:
 
@@ -80,7 +82,6 @@ If unsure between update and create, update the closest existing skill first and
 A portable skill package should normally include:
 
 - `SKILL.md` with valid YAML frontmatter
-- `metadata.scope` set to `global` or `repo-local` when scope matters
 - a trigger-oriented `description`
 - clear "when to use" and "when not to use" boundaries
 - prerequisites or assumptions
@@ -110,11 +111,12 @@ Before installing, check:
 - YAML parses as ordinary frontmatter
 - string values are quoted
 - support files are referenced from `SKILL.md`
-- no placeholders remain except intentional template placeholders
-- no private or stale data was captured
+- placeholders remain only where intentionally templated
+- captured content excludes private and stale data
 - trigger examples include should-use and should-not-use prompts
 - global skills are free of repo-only assumptions
-- repo-local skills name the repo assumptions they depend on
+- repo-local skills name repo assumptions only when those assumptions affect the procedure
+- the skill was written to the correct source root for the placement decision
 - the resolved `<global-refresh-command>` was run after global changes, with its intended agent scope preserved
 
 ## Example Transformation
@@ -125,14 +127,14 @@ Poor capture:
 
 Reusable skill content:
 
-> For deployment-auth failures, first inspect the live runtime identity, then compare it with the deploy configuration and only then patch source configuration. Do not store incident IDs, branch names, or commit hashes.
+> For deployment-auth failures, first inspect the live runtime identity, then compare it with the deploy configuration and only then patch source configuration. Strip incident IDs, branch names, and commit hashes.
 
-## Scope Examples
+## Placement Examples
 
-Repo-local skill:
+Repo-local placement:
 
 > In this repo, diagnose release workflow failures by checking `.github/workflows/release-promote.yml`, bootstrap allow-lists, and `deploy/terraform/` static validation before changing pipeline inputs.
 
-Global skill:
+Global placement:
 
 > When diagnosing deployment failures, establish the live runtime state first, compare it to source configuration, make the smallest targeted change, then verify against the same baseline.

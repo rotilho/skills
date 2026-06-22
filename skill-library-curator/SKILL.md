@@ -7,7 +7,6 @@ compatibility: "opencode"
 metadata:
   audience: "general"
   workflow: "skill-library-maintenance"
-  scope: "global"
   style: "concise"
 ---
 

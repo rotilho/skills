@@ -7,19 +7,12 @@ compatibility: "opencode"
 metadata:
   audience: "general"
   workflow: "[workflow-category]"
-  scope: "[global-or-repo-local]"
   style: "concise"
 ---
 
 # [Skill Title]
 
 Use this skill to [one-sentence procedural purpose].
-
-## Scope
-
-- Scope: `[global-or-repo-local]`
-- Source root: `[<global-skill-source> or <repo-local-skill-source>]`
-- Repo assumptions: `[for repo-local skills only; remove this line for global skills]`
 
 ## Reference files
 
