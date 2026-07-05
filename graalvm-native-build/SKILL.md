@@ -1,6 +1,6 @@
 ---
 name: "graalvm-native-build"
-version: "1.0.0"
+version: "1.0.2"
 description: "Compile GraalVM native-image applications locally in disposable Podman or Docker builder containers. Use when the user asks to build a native binary, run Gradle nativeCompile or Maven native compilation, reproduce CI native-image builds, build static musl binaries, generate or use reachability metadata, or debug native-image linker and metadata failures without installing GraalVM tooling on the host."
 license: "MIT"
 compatibility: "opencode"
@@ -35,8 +35,11 @@ Produce or diagnose a local native binary using the project's build settings as 
 - Inspect the project first. Prefer CI workflow files, `Dockerfile`, `build.gradle(.kts)`, `pom.xml`, README native-build notes, and existing `META-INF/native-image` metadata.
 - Do not install GraalVM, compilers, musl, or package-manager dependencies on the host unless the user explicitly asks.
 - Prefer disposable `podman run --rm` containers. Use `docker run --rm` only when Podman is unavailable.
-- Use the project's CI Java feature version and native-image options instead of guessing.
-- For static musl builds, prefer `ghcr.io/graalvm/native-image-community:<java-feature>-muslib`, for example `ghcr.io/graalvm/native-image-community:25-muslib`.
+- Use the project's CI GraalVM distribution, Java feature version, and native-image options instead of guessing.
+- For static musl builds, choose the image that matches CI:
+  - use `container-registry.oracle.com/graalvm/native-image:<java-feature>-muslib` when CI uses `graalvm/setup-graalvm` with `distribution: graalvm`;
+  - use `ghcr.io/graalvm/native-image-community:<java-feature>-muslib` when CI or the user explicitly targets GraalVM Community Edition.
+- Always print `java -version` and `native-image --version`; feature tags and `latest` can differ by distribution and may lag each other.
 - Keep downloaded dependencies and build caches outside the host toolchain, usually in container mounts such as `/tmp/<project>-gradle` or `/tmp/<project>-m2`.
 - If tests need Testcontainers, pass the host container socket into the builder container instead of switching to host GraalVM.
 - If the native build fails because of application code or metadata, fix the smallest relevant code or metadata issue and rerun the focused native build.
@@ -69,7 +72,13 @@ Prefer Podman:
 command -v podman docker
 ```
 
-For a static musl Java 25 build, verify or pull:
+For a static musl Java 25 build that uses Oracle GraalVM in CI, verify or pull:
+
+```bash
+podman run --rm --pull=missing --entrypoint /bin/bash container-registry.oracle.com/graalvm/native-image:25-muslib -lc 'java -version && native-image --version && command -v x86_64-linux-musl-gcc || true'
+```
+
+For a Community Edition build, verify or pull:
 
 ```bash
 podman run --rm --pull=missing --entrypoint /bin/bash ghcr.io/graalvm/native-image-community:25-muslib -lc 'java -version && native-image --version && command -v x86_64-linux-musl-gcc || true'
@@ -87,7 +96,7 @@ podman run --rm --pull=missing --security-opt label=disable \
   -v /tmp/project-gradle:/gradle-home \
   -e GRADLE_USER_HOME=/gradle-home \
   --entrypoint /bin/bash \
-  ghcr.io/graalvm/native-image-community:25-muslib \
+  container-registry.oracle.com/graalvm/native-image:25-muslib \
   -lc 'cd /workspace/project && ./gradlew --no-daemon nativeCompile'
 ```
 
@@ -99,7 +108,7 @@ podman run --rm --pull=missing --security-opt label=disable \
   -v /tmp/project-m2:/m2 \
   -e MAVEN_OPTS="-Dmaven.repo.local=/m2" \
   --entrypoint /bin/bash \
-  ghcr.io/graalvm/native-image-community:25-muslib \
+  container-registry.oracle.com/graalvm/native-image:25-muslib \
   -lc 'cd /workspace/project && mvn -Pnative native:compile'
 ```
 
@@ -109,6 +118,8 @@ Use Docker with the same mounts and environment if Podman is unavailable.
 
 When CI uses the native-image agent, run the same metadata-producing task before `nativeCompile`.
 
+If investigating a tracing-agent regression or warning, first create the smallest Java repro that triggers the same agent path and run it inside the matching builder image. Prefer this before a full Gradle, Cucumber, or integration-test metadata run so you can separate a GraalVM agent bug from application startup cost.
+
 For Gradle:
 
 ```bash
@@ -117,7 +128,7 @@ podman run --rm --pull=missing --security-opt label=disable \
   -v /tmp/project-gradle:/gradle-home \
   -e GRADLE_USER_HOME=/gradle-home \
   --entrypoint /bin/bash \
-  ghcr.io/graalvm/native-image-community:25-muslib \
+  container-registry.oracle.com/graalvm/native-image:25-muslib \
   -lc 'cd /workspace/project && ./gradlew -Pagent test --no-daemon --info --fail-fast'
 ```
 
@@ -126,6 +137,8 @@ Then point the native build at the generated metadata when the project does not 
 ```bash
 export NATIVE_IMAGE_OPTIONS="--static --libc=musl -H:ConfigurationFileDirectories=/workspace/project/build/native/agent-output/test"
 ```
+
+If the current GraalVM agent is much slower than a previous release but the app needs correct field-level reflection metadata, test an explicit previous-version agent library before disabling metadata tracking. Use `-agentpath:/path/to/old/libnative-image-agent.so=config-output-dir=<agent-output>,track-reflection-metadata=true` so the JVM and native compile can stay on the target GraalVM version while only the tracing library changes. Accept this only after the full metadata-producing test run, native compile, and native runtime smoke pass with the generated metadata.
 
 ### 5. Support Testcontainers from inside the builder
 
@@ -144,7 +157,7 @@ podman run --rm --pull=missing --security-opt label=disable \
   -e TESTCONTAINERS_HOST_OVERRIDE=host.containers.internal \
   -e GRADLE_USER_HOME=/gradle-home \
   --entrypoint /bin/bash \
-  ghcr.io/graalvm/native-image-community:25-muslib \
+  container-registry.oracle.com/graalvm/native-image:25-muslib \
   -lc 'cd /workspace/project && ./gradlew -Pagent test --no-daemon --info --fail-fast'
 ```
 
@@ -166,9 +179,11 @@ If the project packages the binary into an application image, build that image o
 ## Common failures
 
 - `x86_64-linux-musl-gcc not found`: use the `*-muslib` native-image image for static musl builds.
+- The GHCR Community `latest` or feature tag may be older than the Oracle GraalVM tag used by `graalvm/setup-graalvm`; verify versions instead of assuming it is the newest available GraalVM.
 - `cannot find -lstdc++`: the build is not using a complete musl-capable native-image image or its musl toolchain is not on `PATH`.
 - undefined glibc symbols such as `__libc_single_threaded`, `__memcpy_chk`, or `__fprintf_chk`: the link is mixing glibc static libraries into a musl build; switch to the official muslib image or fix the container toolchain path.
 - `MissingReflectionRegistrationError`: generate reachability metadata with the same task CI uses, add missing metadata, or remove the reflection path.
+- A slow current-version native-image agent is not enough reason to turn off field-level reflection tracking. First test caller/access filters or an explicit previous-version `libnative-image-agent.so` with `-agentpath`; then prove the generated metadata by compiling and smoke-running the native binary.
 - Testcontainers cannot connect to Docker: mount the host container socket and set `DOCKER_HOST`; verify the socket from inside the builder.
 - Testcontainers connects to Podman but fails with `Could not connect to Ryuk`: set `TESTCONTAINERS_RYUK_DISABLED=true` for the disposable builder run and clean up leftover test containers after failures.
 - Testcontainers starts a service container but JDBC or HTTP checks connect to `localhost:<mapped-port>` and fail: set `TESTCONTAINERS_HOST_OVERRIDE=host.containers.internal` so the builder reaches host-mapped ports.
