@@ -1,7 +1,7 @@
 ---
 name: "create-skill"
-version: "1.0.0"
-description: "Create or improve an agent skill. Use when the user wants a new `SKILL.md`, a rewrite of an existing skill, better trigger coverage or trigger/overlap evaluation, tighter instructions, or a repeated workflow turned into a reusable skill."
+version: "1.0.1"
+description: "Create or improve an agent skill. Use when the user wants a new `SKILL.md`, a rewrite of an existing skill, better trigger coverage, behavior simulation, trigger/overlap evaluation, tighter instructions, or a repeated workflow turned into a reusable skill."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -29,7 +29,7 @@ Produce a skill that is:
 - easy to trigger correctly
 - procedural, not vague
 - short enough to stay usable
-- verified enough to hand off
+- verified through trigger checks and realistic behavior simulation when behavior changed
 
 Do not stop at a draft unless the user asked for planning only.
 
@@ -44,6 +44,7 @@ Unless local runtime docs say otherwise:
 - write `description` for triggering, not as a topic label
 - always quote string-valued YAML frontmatter fields; do not leave them unquoted
 - keep the body lean; move bulky detail into `references/`, `scripts/`, or `assets/` when needed
+- when a skill's behavioral instructions change, run at least one realistic simulation where an agent applies the skill to produce the intended kind of output
 
 If repo conventions and runtime rules conflict, follow the runtime rules.
 
@@ -148,7 +149,31 @@ Check that the description helps the agent choose this skill over adjacent ones.
 
 Use realistic prompts.
 
-### Step 7 - Verify the artifact
+### Step 7 - Simulate behavior
+
+For new skills or behavior-changing updates, run at least one realistic task simulation:
+- give the agent a small but concrete input artifact, code sample, document, or repo slice
+- ask it to apply the skill and produce the expected work product, not just choose the skill
+- keep the simulation scratch output under `.workbench/` or another ignored scratch path
+- inspect the output for the behavior the skill is supposed to cause
+- capture any gap by patching the skill or documenting why the simulation was skipped
+
+Examples:
+- for a code-style skill, have the agent edit a small code sample and test or explain the change
+- for a research skill, have the agent produce a sourced mini-brief from real sources
+- for a writing skill, have the agent rewrite a representative passage
+- for a workflow skill, have the agent execute the workflow against a tiny fixture
+
+Trigger-selection evals are not a substitute for behavior simulation. They only prove activation.
+
+Skip simulation only when:
+- the user explicitly asked for trigger-only review
+- the skill has no behavioral change
+- the required tool or environment is unavailable and a realistic scratch fixture cannot substitute
+
+When skipped, say exactly why.
+
+### Step 8 - Verify the artifact
 
 Check:
 - the folder exists where expected
@@ -200,6 +225,7 @@ Before finishing, confirm that you:
 - removed scaffold placeholders
 - kept the skill concise
 - added support files only when needed
+- ran a realistic behavior simulation when the skill behavior changed, or stated why it was not possible
 - verified the final layout
 
 ## Final answer style
@@ -208,5 +234,6 @@ Report back with:
 - what skill was created or updated
 - which files changed
 - what improved in triggering or structure
+- what behavior simulation was run, if any
 - any limitations or open risks
 - what you verified

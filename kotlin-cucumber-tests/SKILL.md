@@ -1,7 +1,7 @@
 ---
 name: "kotlin-cucumber-tests"
-version: "1.0.0"
-description: "Plan, review, or improve Kotlin Cucumber / BDD tests: decide when Cucumber fits, structure feature files, step definitions, hooks, fixtures, and Kotlin helpers, and keep domain language readable without coupling steps to implementation details. Use when the request explicitly centers on Kotlin Cucumber, Kotlin BDD, feature files, step definitions, hooks, or executable-specification tests and reviews."
+version: "1.0.1"
+description: "Plan, review, or improve Kotlin Cucumber / BDD tests: decide when Cucumber fits workflow behavior, when lower-level tests fit dense rules, and how to structure feature files, step definitions, hooks, fixtures, async outcome polling, and Kotlin helpers without coupling steps to protocol or implementation details. Use when the request explicitly centers on Kotlin Cucumber, Kotlin BDD, feature files, step definitions, hooks, or executable-specification tests and reviews."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -30,6 +30,7 @@ Do not use this skill for generic unit tests, framework-neutral test advice, bro
 Produce Cucumber guidance or edits that:
 - keep scenarios readable to non-implementers
 - keep step definitions thin and behavior-focused
+- keep Cucumber at workflow and acceptance-behavior level
 - keep shared state scenario-scoped and explicit
 - use Kotlin-specific structure only where it improves the test code
 - keep overlap boundaries with unit and lower-level integration tests clear
@@ -38,6 +39,7 @@ Produce Cucumber guidance or edits that:
 
 - treat BDD guidance as the base layer and add Kotlin specifics only where they change the answer
 - use Cucumber for externally visible behavior, workflow rules, and acceptance-level examples; do not force it into unit-level logic
+- use lower-level tests for dense serializer, validator, parser, mapper, algorithm, and value-object cases
 - keep feature files in business language, not UI locator, HTTP client, SQL, or object-construction detail
 - prefer Cucumber Expressions and shared helper methods over many near-duplicate step definitions
 - avoid sharing state across scenarios; keep fixtures and mutable context per scenario
@@ -56,6 +58,8 @@ Prefer lower-level tests when the request is mainly about:
 - pure domain logic
 - algorithm branches
 - mapper or serializer edge cases
+- validator or parser matrices
+- round-trip or boundary-heavy contract cases
 - narrow repository or client behavior
 - fast feedback on many permutations
 
@@ -85,6 +89,7 @@ Prefer these defaults:
 - reuse steps when the phrasing represents the same behavior, but do not over-parameterize unrelated actions into one vague mega-step
 - use data tables or doc strings when they make the example clearer than many scalar parameters
 - keep assertions in `Then` steps focused on observable outcomes
+- hide protocol mechanics, DTO construction, polling loops, and transport details below the glue layer unless they are the behavior under test
 - for event-owned systems, phrase steps around commands, facts, and visible outcomes rather than class names or internal methods
 
 Avoid:
@@ -129,6 +134,7 @@ Prefer:
 - `Before` and `After` hooks for low-level environment setup, cleanup, screenshots, or database reset
 - conditional hooks via tags for special environments
 - shared fixture builders and helper APIs below the glue layer
+- polling helpers below the step layer for async systems, so feature files assert eventual observable outcomes without timing mechanics
 - tags for selecting scenario subsets and for operational metadata that the team actually uses
 
 Avoid:
@@ -146,6 +152,7 @@ Watch for:
 - duplicated step text with slightly different regexes
 - leaked state between scenarios
 - slow suites caused by pushing too many narrow cases into Cucumber instead of lower-level tests
+- flaky async assertions that check internal timing or listener calls instead of waiting for observable outcomes
 - Kotlin hook mistakes around companion objects, named objects, or static expectations
 
 ### Step 7 - Explain boundaries briefly
@@ -159,6 +166,7 @@ If you recommend moving a test, say why:
 - Cucumber for business-facing workflows and acceptance contracts
 - integration tests for boundary wiring and infrastructure behavior
 - unit tests for local logic and dense edge cases
+- serializer, parser, and validator tests for round-trip, malformed-input, and boundary matrices
 
 ## Canonical references
 
@@ -172,6 +180,7 @@ If you recommend moving a test, say why:
 Before finishing, confirm that you:
 - kept feature-file advice readable to non-implementers
 - kept step definitions thin and not tightly coupled to implementation detail
+- kept protocol mechanics and async polling below the glue layer unless directly relevant
 - treated hooks, background, and shared state with clear boundaries
 - separated generic BDD advice from Kotlin-specific refinements
 - called out when Cucumber is the wrong level for the requested test

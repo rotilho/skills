@@ -1,7 +1,7 @@
 ---
 name: "kotlin-code-style"
-version: "1.0.0"
-description: "Apply Kotlin-specific code style and design guidance for Kotlin implementation and review: feature-owned file and type organization, helper and extension placement, type design, constructors, nullability, serialization, coroutines, Flow, mutable state ownership, and Kotlin unit/integration test style outside Cucumber or BDD. Use when writing or changing Kotlin code unless Spring application architecture or Cucumber/BDD is the main concern. When this skill loads, also load `code-practice` as the shared engineering base layer."
+version: "1.0.1"
+description: "Apply Kotlin-specific code style and design guidance for Kotlin implementation and review: feature-owned file and type organization, helper and extension placement, constructors, validation shape, nullability, serialization, multiplatform expect/actual source sets, coroutines, Flow, mutable state ownership, and Kotlin unit/integration test style outside Cucumber or BDD. Use when writing or changing Kotlin code unless Spring application architecture or Cucumber/BDD is the main concern. When this skill loads, also load `code-practice` as the shared engineering base layer."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -40,6 +40,8 @@ Produce Kotlin guidance or edits that:
 - use nullability, coroutines, and serialization deliberately
 - keep helper placement and ownership easy to follow
 - keep helpers, extensions, models, and coroutine owners near the behavior they support
+- keep platform differences in source-set structure instead of runtime branches when Kotlin Multiplatform supports it
+- make validation detail available when callers need to explain or recover from invalid input
 
 ## Hard constraints
 
@@ -58,6 +60,7 @@ Focus on the main Kotlin concern:
 - constructors or factories
 - extensions or helper placement
 - nullability and validation
+- multiplatform source-set boundaries
 - serialization
 - coroutines or Flow
 - Kotlin tests
@@ -66,19 +69,25 @@ Focus on the main Kotlin concern:
 
 Prefer these defaults unless local code shows a better house style:
 - one main public type per file
-- name files after the main owned type or behavior; avoid broad names like `Models.kt`, `Extensions.kt`, `Utils.kt`, `Helpers.kt`, or `Support.kt`
+- name files after the main owned type, feature concept, or behavior; avoid broad names like `Models.kt`, `Extensions.kt`, `Utils.kt`, `Helpers.kt`, or `Support.kt`
+- place files by feature or concept ownership before grouping by utility, DTO, enum, or extension type
 - split multi-type files when types belong to different feature owners or change for different reasons
 - keep small related value types together only when they form one concept and are usually read or changed together
-- `data class` for small immutable values
+- prefer compact immutable value types for domain values; use `data class` when structural equality and copying are part of the intended contract
 - constructors for straightforward creation, factories when creation has rules
+- keep factories close to the type when they enforce construction rules, parse external data, or hide platform-specific setup
 - nearby extensions over broad utility files; place them next to the owned feature or type they support
 - expression bodies only when the function stays obvious
 - direct `if` / `when` and early returns when they make straightforward branches easier to scan
 - local `if` / `when` over `?.let`, `also`, or `run` when there is no real scoping or receiver benefit
 - scope functions when they improve locality or receiver clarity, not just to avoid writing a simple branch
 - nullability as part of the contract
+- use structured validation results when callers need error detail, rejected-field detail, or recovery choices
+- keep `isValid()` as a convenience wrapper over structured validation when both detailed and boolean checks are useful
+- use `expect` / `actual` declarations or platform source sets for platform behavior instead of runtime conditionals in common code
 - `suspend` for one-shot async work and `Flow` for streams
 - coroutine scopes, channels, mutexes, and background jobs owned by the lifecycle or workflow that starts and stops them
+- make `Mutex`, coroutine scope, channel, and `Flow` collection ownership explicit in the owning type; do not hide it in a helper with no lifecycle
 - mutable collections and `MutableStateFlow` hidden behind the narrow Kotlin type that owns their invariants
 - local event-fed caches owned by the Kotlin type that makes the synchronous decision; extract shared state only after repetition is real
 - sparse comments focused on the why
@@ -87,6 +96,7 @@ Prefer these defaults unless local code shows a better house style:
 
 For applications:
 - prefer feature-local Kotlin files and packages from the first implementation
+- keep protocol DTOs, local models, and feature state under the workflow or feature that owns their behavior unless they are shared contracts
 - keep core feature logic in ordinary Kotlin types and functions when no framework-managed lifecycle, wiring, or external boundary is involved
 - prefer one lifecycle owner for each coroutine scope, channel, mutex, or background worker
 - prefer explicit concurrency primitives around shared mutable runtime state
@@ -96,7 +106,8 @@ For applications:
 For libraries:
 - prefer tighter public API control
 - prefer explicit wire-format and parsing behavior
-- prefer predictable failure and round-trip testing for external contracts
+- prefer predictable failure, structured validation, and round-trip testing for external contracts
+- keep platform-specific implementations behind `expect` / `actual`, source sets, or injected platform adapters
 
 ### Step 4 - Avoid common Kotlin failure modes
 
@@ -104,6 +115,7 @@ Push back on:
 - catch-all extension files
 - root-level `Models.kt`, `Extensions.kt`, `Utils.kt`, `Helpers.kt`, or `Support.kt` files that mix feature concepts
 - packages split only by type category instead of feature ownership
+- common-source runtime conditionals that should be platform source-set implementations
 - top-level functions that hide which feature owns the behavior
 - `object` singletons used as dumping grounds for unrelated helpers
 - `!!` outside tight invariant boundaries
@@ -113,6 +125,7 @@ Push back on:
 - nullable chains or expression-body cleverness when explicit branching would be clearer
 - hidden background work with unclear scope ownership
 - coroutine workers started without a clear owner, shutdown path, and failure boundary
+- `Mutex` or `MutableStateFlow` ownership that cannot be traced to one workflow or lifecycle
 - mutable maps, mutable lists, or `MutableStateFlow` exposed outside their owner
 
 ### Step 4a - Kotlin examples for event-owned state
@@ -150,6 +163,16 @@ If the issue is:
 - Kotlin Cucumber, feature files, step definitions, or BDD glue design: use `kotlin-cucumber-tests`
 - Spring controllers, configuration, transactions, or integration testing: use `spring-application-code-style`
 
+### Step 6 - Shape Kotlin tests around behavior
+
+Prefer behavior-named tests that cover:
+- positive examples that prove the intended path
+- negative examples that prove expected rejection
+- round-trip examples for serialization, parsing, and wire contracts
+- boundary examples for minimum, maximum, empty, malformed, or platform-specific values
+
+Use lower-level Kotlin tests for dense rule matrices, serializers, validators, and value types. Use broader integration or workflow tests only when the behavior depends on real wiring, external contracts, or coroutine scheduling.
+
 ## Canonical references
 
 - Kotlin coding conventions: https://kotlinlang.org/docs/coding-conventions.html
@@ -163,6 +186,9 @@ Before finishing, confirm that you:
 - kept helper placement and ownership clear
 - treated nullability and async behavior explicitly
 - kept coroutine and mutable-state ownership narrow
+- kept platform differences out of common runtime conditionals when source sets fit
+- used structured validation where callers need error detail
+- selected test level and case shape for the Kotlin behavior being changed
 - preferred direct control flow over clever chaining where the branch was straightforward
 - avoided adding normalization or reshaping code unless correctness or the request justified it
 - separated application and library advice when it mattered

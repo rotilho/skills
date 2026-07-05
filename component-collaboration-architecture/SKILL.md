@@ -1,7 +1,7 @@
 ---
 name: "component-collaboration-architecture"
-version: "1.0.0"
-description: "Design or refactor how components, classes, modules, or services collaborate by choosing direct calls, orchestration, events, observers, projections, shared state, or local ownership. Use when a class calls many collaborators, handlers/listeners/proxies only forward, ownership of behavior/data/state is unclear, or the user asks whether to emit an event and consume it in N places. Avoid for ordinary cleanup, Kotlin idioms, Spring wiring, or Cucumber structure unless collaboration boundaries are the main issue."
+version: "1.1.0"
+description: "Design or refactor how components, classes, modules, or services collaborate by choosing direct calls, orchestration, domain events, observers, projections, shared state, or local ownership. Use when a class calls many collaborators, source-of-truth or primitive domains depend on downstream cleanup/projection/notification work, handlers/listeners/proxies only forward, ownership of behavior/data/state is unclear, a dependency cycle appears, stale projection/cache cleanup crosses domains, or the user asks whether to emit an event and consume it in N places. Avoid for ordinary cleanup, Kotlin idioms, Spring wiring, or Cucumber structure unless collaboration boundaries are the main issue."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -24,6 +24,8 @@ Trigger for work like:
 - replacing shared registries, broad mutable state, or god coordinators with clearer owners
 - designing local projections, read models, event-fed caches, or explicit query boundaries
 - reviewing event-heavy, command-heavy, observer-heavy, or callback-heavy code for ownership
+- breaking dependency cycles where a primitive/source-of-truth domain is reaching into downstream cleanup, projection, notification, or cache maintenance
+- deciding whether a state transition should publish a domain fact for downstream owners to consume
 
 Do not use this skill for ordinary naming, small-function cleanup, Kotlin idioms, Spring wiring, or Cucumber structure unless the main issue is collaboration shape or ownership boundaries.
 
@@ -42,7 +44,10 @@ Choose the simplest collaboration shape that keeps:
 - Pick owners from invariants, state transitions, side effects, and failure responsibility, not from the current caller.
 - Prefer direct calls when the caller intentionally needs sequencing, a return value, one transaction, or immediate failure handling.
 - Prefer events when an owner has completed a fact and independent consumers may react without the owner knowing them.
+- Keep required synchronous validation, sequencing, return values, and transaction-coupled work as direct calls.
 - Do not use events as disguised commands. If something is being requested, model it as a command, method call, job, or workflow step.
+- Prefer factual event names such as `PrimaryDocumentChanged`; avoid command-shaped event names such as `CleanSearchIndexRequested`.
+- More primitive or source-of-truth domains should not import downstream cleanup, projection, notification, or feedback concerns. Publish the completed fact and let the downstream behavior owner consume it.
 - Keep mutable state local to one writer. Other components can keep projections or caches fed by owner-published facts.
 - Keep proxies only when they own translation, protocol adaptation, authorization, retry, lifecycle, observability, or real deduplication.
 - Delete pass-through layers that exist only for symmetry or because "everything needs a handler."
@@ -58,6 +63,7 @@ Before changing code, identify:
 - the component that can accept or reject the action
 - the component that owns each affected state change
 - every downstream side effect
+- whether any source-of-truth owner currently imports downstream cleanup, projection, notification, indexing, or cache-maintenance code
 - every consumer that needs to know about the outcome
 - whether each consumer needs ordering, a return value, retry, idempotency, or transaction coupling
 - which classes only forward calls, events, or DTOs
@@ -108,6 +114,7 @@ Use events when:
 Use projections or local event-fed caches when:
 - a component needs fast local reads for its own decision
 - the source of truth is owned elsewhere
+- a downstream owner needs to react to an upstream fact without making the upstream owner know that downstream concern
 - rebuilding from facts is acceptable or useful
 - direct shared reads would couple schemas or internals
 
@@ -129,6 +136,7 @@ Push these refactors:
 - replace broad registries with local projections owned by the validator or decision maker
 - replace micro-events for internal steps with direct private methods
 - replace event-as-command flows with explicit commands, jobs, or workflow steps
+- replace source-of-truth to downstream direct dependencies with completed-fact publication plus a behavior-owned consumer
 - rename remaining abstractions by the decision, state, or side effect they own
 
 ### Step 5 - Make data ownership explicit
@@ -199,6 +207,47 @@ class Orders(private val events: DomainEvents) {
 
 class ReceiptEmails {
     fun onOrderPaid(event: OrderPaid) = sendReceipt(event.orderId)
+}
+```
+
+### Source-of-truth owner with downstream cleanup
+
+Avoid making the source-of-truth owner depend on downstream cleanup:
+
+```kotlin
+class ProfileService(
+    private val publicationPolicy: PublicationPolicy,
+    private val searchIndex: SearchIndex,
+) {
+    fun changePrimaryDocument(profile: Profile, nextDocumentId: DocumentId) {
+        publicationPolicy.requireAllowed(nextDocumentId)
+        val previousDocumentId = profile.primaryDocumentId
+        profile.primaryDocumentId = nextDocumentId
+        searchIndex.recordStale(previousDocumentId)
+    }
+}
+```
+
+Prefer a direct call for required validation, then publish a completed fact that the downstream owner consumes:
+
+```kotlin
+class ProfileService(
+    private val publicationPolicy: PublicationPolicy,
+    private val events: DomainEvents,
+) {
+    fun changePrimaryDocument(profile: Profile, nextDocumentId: DocumentId) {
+        publicationPolicy.requireAllowed(nextDocumentId)
+        val previousDocumentId = profile.primaryDocumentId
+        if (previousDocumentId == nextDocumentId) return
+
+        profile.primaryDocumentId = nextDocumentId
+        events.publish(PrimaryDocumentChanged(profile.id, previousDocumentId, nextDocumentId))
+    }
+}
+
+class SearchStaleDocumentRecorder(private val searchIndex: SearchIndex) {
+    fun onPrimaryDocumentChanged(event: PrimaryDocumentChanged) =
+        searchIndex.recordStale(event.previousDocumentId)
 }
 ```
 
@@ -273,6 +322,7 @@ Before finishing, confirm that you:
 - removed or justified forwarding layers
 - kept mutable state with one owner
 - separated requests from facts
+- kept source-of-truth domains independent from downstream cleanup/projection/notification dependencies
 - made failure, retry, ordering, and recovery visible where they matter
 - avoided adding eventing or indirection for style alone
 - handed off to language or framework skills only after the collaboration shape was clear
