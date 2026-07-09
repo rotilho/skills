@@ -7,7 +7,6 @@ compatibility: "opencode"
 metadata:
   audience: "general"
   workflow: "testing"
-  style: "concise"
 ---
 
 # Kotlin Cucumber Tests

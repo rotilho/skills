@@ -7,7 +7,6 @@ compatibility: "opencode"
 metadata:
   audience: "general"
   workflow: "architecture"
-  style: "concise"
 ---
 
 # Component Collaboration Architecture

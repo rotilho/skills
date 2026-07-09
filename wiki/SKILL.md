@@ -7,7 +7,6 @@ compatibility: "opencode"
 metadata:
   audience: "general"
   workflow: "knowledge-management"
-  style: "concise"
 ---
 
 # Wiki

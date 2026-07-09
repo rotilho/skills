@@ -7,7 +7,6 @@ compatibility: "opencode"
 metadata:
   audience: "general"
   workflow: "engineering"
-  style: "concise"
 ---
 
 # Code Practice

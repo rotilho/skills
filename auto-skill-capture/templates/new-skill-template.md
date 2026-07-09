@@ -7,7 +7,6 @@ compatibility: "opencode"
 metadata:
   audience: "general"
   workflow: "[workflow-category]"
-  style: "concise"
 ---
 
 # [Skill Title]

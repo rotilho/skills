@@ -7,7 +7,6 @@ compatibility: "opencode"
 metadata:
   audience: "general"
   workflow: "tooling"
-  style: "concise"
 ---
 
 # Ephemeral Container Workbench

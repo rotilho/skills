@@ -7,7 +7,6 @@ compatibility: "opencode"
 metadata:
   audience: "general"
   workflow: "skill-authoring"
-  style: "concise"
 ---
 
 # Auto Skill Capture

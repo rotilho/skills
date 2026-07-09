@@ -7,7 +7,6 @@ compatibility: "opencode"
 metadata:
   audience: "general"
   workflow: "communication"
-  style: "concise"
 ---
 
 # Concise

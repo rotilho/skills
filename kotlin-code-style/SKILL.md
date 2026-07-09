@@ -7,7 +7,6 @@ compatibility: "opencode"
 metadata:
   audience: "general"
   workflow: "engineering"
-  style: "concise"
 ---
 
 # Kotlin Code Style

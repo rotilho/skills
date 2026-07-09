@@ -7,7 +7,6 @@ compatibility: "opencode"
 metadata:
   audience: "general"
   workflow: "authoring"
-  style: "concise"
 ---
 
 # Create Skill

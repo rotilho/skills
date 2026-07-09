@@ -7,7 +7,6 @@ compatibility: "opencode"
 metadata:
   audience: "general"
   workflow: "build"
-  style: "concise"
 ---
 
 # GraalVM Native Build
