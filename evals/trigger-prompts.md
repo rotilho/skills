@@ -21,6 +21,9 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "In this Kotlin multiplatform library, replace runtime platform branches with source-set-owned behavior and add validation tests with positive, negative, round-trip, and boundary cases." | `kotlin-code-style` | Kotlin library style, expect/actual boundaries, validation, and test shape. |
 | "Review these Kotlin Cucumber feature files and step definitions for BDD quality." | `kotlin-cucumber-tests` | Cucumber feature/step design. |
 | "Turn this async workflow into Kotlin Cucumber scenarios where step glue hides protocol details and polls for observable outcomes." | `kotlin-cucumber-tests` | Workflow-level Cucumber with async outcome boundaries. |
+| "Take a screenshot of my localhost app with Playwright now that browsermcp is gone." | `playwright-screenshots` | Headless browser screenshot capture without browsermcp. |
+| "Verify Playwright can launch Chromium and save a screenshot before using it for UI checks." | `playwright-screenshots` | Browser launch plus screenshot smoke test. |
+| "Capture mobile and full-page screenshots of this generated HTML page using a headless browser." | `playwright-screenshots` | Screenshot workflow with viewport/full-page options. |
 | "Improve this Spring Boot controller/service/repository package structure and transaction boundary." | `spring-application-code-style` | Spring application architecture. |
 | "Clean up this Spring Boot app so controllers stay thin, feature config validates at startup, and async event tests prove downstream observable state." | `spring-application-code-style` | Spring application edges, configuration, async events, and validation. |
 | "Decide where this architecture decision belongs in the repo wiki and link related pages." | `wiki` | Durable knowledge-base organization. |
@@ -41,6 +44,9 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Summarize this provided note more briefly." | `deep-research` | `concise` |
 | "Make this dashboard visually cleaner without producing a DESIGN.md." | `design-extractor` | Frontend design or implementation guidance |
 | "Add this CLI to the project Dockerfile so CI can use it." | `ephemeral-container-workbench` | Project container/toolchain maintenance |
+| "Use my current Chrome tab and logged-in cookies to inspect this dashboard." | `playwright-screenshots` | Browser bridge or exported auth state |
+| "Scrape the latest pricing table from this public website." | `playwright-screenshots` | `firecrawl` or web research tooling |
+| "Install a browser extension into my personal Chrome profile." | `playwright-screenshots` | Manual browser setup or browser bridge |
 | "Organize temporary raw scrape outputs from a research run." | `wiki` | `deep-research` working artifacts |
 
 ## Realistic workflow prompts
