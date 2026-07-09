@@ -1,0 +1,589 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+default_root="$(cd "$script_dir/.." && pwd)"
+KANBAN_ROOT="${KANBAN_ROOT:-$default_root}"
+config_file="$KANBAN_ROOT/config.env"
+tasks_dir="$KANBAN_ROOT/tasks"
+archive_dir="$KANBAN_ROOT/archive"
+template_file="$KANBAN_ROOT/templates/task.md"
+board_file="$KANBAN_ROOT/BOARD.md"
+
+die() {
+  printf 'kanban: %s\n' "$*" >&2
+  exit 1
+}
+
+usage() {
+  cat <<'EOF'
+Usage:
+  kanban create "Title" [--priority urgent|high|normal|low] [--status todo|in-progress|blocked|review|done] [--type task] [--assignee name] [--depends ID[,ID]]
+  kanban list [--status status]
+  kanban board
+  kanban show ID
+  kanban move ID status [--reason text]
+  kanban note ID "text"
+  kanban depend ID DEPENDS_ON_ID
+  kanban undepend ID DEPENDS_ON_ID
+  kanban ready
+  kanban waiting
+  kanban next
+  kanban archive ID [--force]
+  kanban archive --done
+  kanban validate
+EOF
+}
+
+load_config() {
+  [[ -f "$config_file" ]] || die "missing config: $config_file"
+  # shellcheck disable=SC1090
+  source "$config_file"
+  : "${KANBAN_PROJECT_NAME:?}"
+  : "${KANBAN_TASK_PREFIX:?}"
+  : "${KANBAN_ID_WIDTH:?}"
+  : "${KANBAN_STATUSES:?}"
+  : "${KANBAN_PRIORITIES:?}"
+  : "${KANBAN_DEFAULT_STATUS:?}"
+  : "${KANBAN_DEFAULT_PRIORITY:?}"
+}
+
+ensure_layout() {
+  mkdir -p "$tasks_dir" "$archive_dir" "$KANBAN_ROOT/templates" "$KANBAN_ROOT/scripts"
+}
+
+now() {
+  date -Iseconds
+}
+
+contains_word() {
+  local needle="$1"
+  local haystack="$2"
+  local item
+  for item in $haystack; do
+    [[ "$item" == "$needle" ]] && return 0
+  done
+  return 1
+}
+
+require_status() {
+  contains_word "$1" "$KANBAN_STATUSES" || die "invalid status '$1'. Allowed: $KANBAN_STATUSES"
+}
+
+require_priority() {
+  contains_word "$1" "$KANBAN_PRIORITIES" || die "invalid priority '$1'. Allowed: $KANBAN_PRIORITIES"
+}
+
+dependency_ids() {
+  local raw="$1"
+  raw="${raw//,/ }"
+  printf '%s\n' $raw
+}
+
+normalize_dependencies() {
+  local raw="$*"
+  raw="${raw//,/ }"
+  local dep normalized=()
+  local seen=" "
+  for dep in $raw; do
+    [[ -n "$dep" ]] || continue
+    [[ "$dep" =~ ^${KANBAN_TASK_PREFIX}-[0-9]+$ ]] || die "invalid dependency id: $dep"
+    if [[ "$seen" != *" $dep "* ]]; then
+      normalized+=("$dep")
+      seen+="$dep "
+    fi
+  done
+  local IFS=,
+  printf '%s\n' "${normalized[*]}"
+}
+
+task_path() {
+  local id="$1"
+  if [[ -f "$tasks_dir/$id.md" ]]; then
+    printf '%s\n' "$tasks_dir/$id.md"
+    return 0
+  fi
+  local found
+  found="$(find "$archive_dir" -type f -name "$id.md" -print -quit 2>/dev/null || true)"
+  [[ -n "$found" ]] && printf '%s\n' "$found"
+}
+
+active_task_path() {
+  local id="$1"
+  [[ -f "$tasks_dir/$id.md" ]] || die "active task not found: $id"
+  printf '%s\n' "$tasks_dir/$id.md"
+}
+
+require_task_exists() {
+  local id="$1"
+  [[ -n "$(task_path "$id")" ]] || die "task not found: $id"
+}
+
+require_dependencies_exist() {
+  local owner="$1"
+  local deps="$2"
+  local dep
+  while IFS= read -r dep; do
+    [[ -n "$dep" ]] || continue
+    [[ "$dep" != "$owner" ]] || die "task cannot depend on itself: $owner"
+    require_task_exists "$dep"
+  done < <(dependency_ids "$deps")
+}
+
+field_value() {
+  local file="$1"
+  local field="$2"
+  awk -v field="$field" '
+    BEGIN { in_meta = 0 }
+    NR == 1 && $0 == "---" { in_meta = 1; next }
+    in_meta && $0 == "---" { exit }
+    in_meta && index($0, field ":") == 1 {
+      value = substr($0, length(field) + 2)
+      sub(/^[[:space:]]*/, "", value)
+      gsub(/^"|"$/, "", value)
+      print value
+      exit
+    }
+  ' "$file"
+}
+
+set_field() {
+  local file="$1"
+  local field="$2"
+  local value="$3"
+  local tmp
+  tmp="$(mktemp)"
+  awk -v field="$field" -v value="$value" '
+    BEGIN { in_meta = 0; done = 0 }
+    NR == 1 && $0 == "---" { in_meta = 1; print; next }
+    in_meta && $0 == "---" { in_meta = 0; print; next }
+    in_meta && index($0, field ":") == 1 {
+      print field ": \"" value "\""
+      done = 1
+      next
+    }
+    { print }
+  ' "$file" > "$tmp"
+  mv "$tmp" "$file"
+}
+
+escape_sed() {
+  printf '%s' "$1" | sed 's/[\/&]/\\&/g'
+}
+
+next_id() {
+  local max=0
+  local file base number
+  while IFS= read -r file; do
+    base="$(basename "$file" .md)"
+    [[ "$base" =~ ^${KANBAN_TASK_PREFIX}-[0-9]+$ ]] || continue
+    number="${base#"$KANBAN_TASK_PREFIX-"}"
+    ((10#$number > max)) && max=$((10#$number))
+  done < <(find "$tasks_dir" "$archive_dir" -type f -name "${KANBAN_TASK_PREFIX}-*.md" -print 2>/dev/null || true)
+  printf "%s-%0*d\n" "$KANBAN_TASK_PREFIX" "$KANBAN_ID_WIDTH" "$((max + 1))"
+}
+
+render_template() {
+  local id="$1"
+  local title="$2"
+  local status="$3"
+  local priority="$4"
+  local type="$5"
+  local assignee="$6"
+  local depends_on="$7"
+  local created="$8"
+  [[ -f "$template_file" ]] || die "missing template: $template_file"
+  sed \
+    -e "s/{{id}}/$(escape_sed "$id")/g" \
+    -e "s/{{title}}/$(escape_sed "$title")/g" \
+    -e "s/{{status}}/$(escape_sed "$status")/g" \
+    -e "s/{{priority}}/$(escape_sed "$priority")/g" \
+    -e "s/{{type}}/$(escape_sed "$type")/g" \
+    -e "s/{{assignee}}/$(escape_sed "$assignee")/g" \
+    -e "s/{{depends_on}}/$(escape_sed "$depends_on")/g" \
+    -e "s/{{created}}/$(escape_sed "$created")/g" \
+    -e "s/{{updated}}/$(escape_sed "$created")/g" \
+    "$template_file"
+}
+
+active_files() {
+  find "$tasks_dir" -maxdepth 1 -type f -name "${KANBAN_TASK_PREFIX}-*.md" -print 2>/dev/null | sort
+}
+
+task_is_done() {
+  local id="$1"
+  local file
+  file="$(task_path "$id")"
+  [[ -n "$file" ]] || return 1
+  [[ "$file" == "$archive_dir/"* ]] && return 0
+  [[ "$(field_value "$file" status)" == "done" ]]
+}
+
+blocking_dependencies() {
+  local file="$1"
+  local deps dep dep_file blocking=()
+  deps="$(field_value "$file" depends_on)"
+  while IFS= read -r dep; do
+    [[ -n "$dep" ]] || continue
+    dep_file="$(task_path "$dep")"
+    if [[ -z "$dep_file" ]]; then
+      blocking+=("$dep:missing")
+    elif ! task_is_done "$dep"; then
+      blocking+=("$dep")
+    fi
+  done < <(dependency_ids "$deps")
+  local IFS=,
+  printf '%s\n' "${blocking[*]}"
+}
+
+dependencies_satisfied() {
+  [[ -z "$(blocking_dependencies "$1")" ]]
+}
+
+generate_board() {
+  local generated status file id title priority assignee updated depends_on blocked_by any
+  generated="$(now)"
+  {
+    printf '# %s Kanban Board\n\n' "$KANBAN_PROJECT_NAME"
+    printf '_Generated: %s_\n\n' "$generated"
+    for status in $KANBAN_STATUSES; do
+      printf '## %s\n\n' "$status"
+      any=0
+      while IFS= read -r file; do
+        [[ -n "$file" ]] || continue
+        [[ "$(field_value "$file" status)" == "$status" ]] || continue
+        id="$(field_value "$file" id)"
+        title="$(field_value "$file" title)"
+        priority="$(field_value "$file" priority)"
+        assignee="$(field_value "$file" assignee)"
+        depends_on="$(field_value "$file" depends_on)"
+        blocked_by="$(blocking_dependencies "$file")"
+        updated="$(field_value "$file" updated)"
+        printf -- '- [%s](tasks/%s.md) `%s` `%s`' "$title" "$id" "$id" "$priority"
+        [[ -n "$assignee" ]] && printf ' @%s' "$assignee"
+        [[ -n "$depends_on" ]] && printf ' depends:%s' "$depends_on"
+        [[ -n "$blocked_by" ]] && printf ' blocked-by:%s' "$blocked_by"
+        [[ -n "$updated" ]] && printf ' updated:%s' "$updated"
+        printf '\n'
+        any=1
+      done < <(active_files)
+      [[ "$any" -eq 0 ]] && printf '_No tasks._\n'
+      printf '\n'
+    done
+  } > "$board_file"
+}
+
+cmd_create() {
+  local status="$KANBAN_DEFAULT_STATUS"
+  local priority="$KANBAN_DEFAULT_PRIORITY"
+  local type="task"
+  local assignee=""
+  local depends_on=""
+  local title_parts=()
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --status) status="${2:-}"; shift 2 ;;
+      --priority) priority="${2:-}"; shift 2 ;;
+      --type) type="${2:-}"; shift 2 ;;
+      --assignee) assignee="${2:-}"; shift 2 ;;
+      --depends) depends_on="$(normalize_dependencies "${2:-}")"; shift 2 ;;
+      --help) usage; exit 0 ;;
+      --*) die "unknown option for create: $1" ;;
+      *) title_parts+=("$1"); shift ;;
+    esac
+  done
+  [[ "${#title_parts[@]}" -gt 0 ]] || die "create requires a title"
+  require_status "$status"
+  require_priority "$priority"
+  local title id created file
+  title="${title_parts[*]}"
+  id="$(next_id)"
+  require_dependencies_exist "$id" "$depends_on"
+  created="$(now)"
+  file="$tasks_dir/$id.md"
+  render_template "$id" "$title" "$status" "$priority" "$type" "$assignee" "$depends_on" "$created" > "$file"
+  generate_board
+  printf '%s\n' "$id"
+}
+
+cmd_list() {
+  local status_filter=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --status) status_filter="${2:-}"; require_status "$status_filter"; shift 2 ;;
+      --help) usage; exit 0 ;;
+      --*) die "unknown option for list: $1" ;;
+      *) die "unexpected argument for list: $1" ;;
+    esac
+  done
+  local file id title status priority
+  while IFS= read -r file; do
+    [[ -n "$file" ]] || continue
+    status="$(field_value "$file" status)"
+    [[ -z "$status_filter" || "$status" == "$status_filter" ]] || continue
+    id="$(field_value "$file" id)"
+    title="$(field_value "$file" title)"
+    priority="$(field_value "$file" priority)"
+    printf '%s\t%s\t%s\t%s\n' "$id" "$status" "$priority" "$title"
+  done < <(active_files)
+}
+
+cmd_show() {
+  [[ $# -eq 1 ]] || die "show requires exactly one task id"
+  local file
+  file="$(task_path "$1")"
+  [[ -n "$file" ]] || die "task not found: $1"
+  cat "$file"
+}
+
+cmd_move() {
+  [[ $# -ge 2 ]] || die "move requires task id and target status"
+  local id="$1"
+  local status="$2"
+  shift 2
+  local reason=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --reason) reason="${2:-}"; shift 2 ;;
+      --*) die "unknown option for move: $1" ;;
+      *) die "unexpected argument for move: $1" ;;
+    esac
+  done
+  require_status "$status"
+  local file timestamp
+  file="$(active_task_path "$id")"
+  timestamp="$(now)"
+  set_field "$file" status "$status"
+  set_field "$file" updated "$timestamp"
+  if [[ -n "$reason" ]]; then
+    printf '\n- %s: Moved to `%s`: %s\n' "$timestamp" "$status" "$reason" >> "$file"
+  else
+    printf '\n- %s: Moved to `%s`.\n' "$timestamp" "$status" >> "$file"
+  fi
+  generate_board
+}
+
+cmd_note() {
+  [[ $# -ge 2 ]] || die "note requires task id and text"
+  local id="$1"
+  shift
+  local file text timestamp
+  file="$(active_task_path "$id")"
+  text="$*"
+  timestamp="$(now)"
+  set_field "$file" updated "$timestamp"
+  printf '\n- %s: %s\n' "$timestamp" "$text" >> "$file"
+  generate_board
+}
+
+cmd_depend() {
+  [[ $# -eq 2 ]] || die "depend requires task id and dependency id"
+  local id="$1"
+  local dependency="$2"
+  local file existing deps timestamp
+  file="$(active_task_path "$id")"
+  require_dependencies_exist "$id" "$dependency"
+  existing="$(field_value "$file" depends_on)"
+  deps="$(normalize_dependencies "$existing,$dependency")"
+  timestamp="$(now)"
+  set_field "$file" depends_on "$deps"
+  set_field "$file" updated "$timestamp"
+  printf '\n- %s: Added dependency `%s`.\n' "$timestamp" "$dependency" >> "$file"
+  generate_board
+}
+
+cmd_undepend() {
+  [[ $# -eq 2 ]] || die "undepend requires task id and dependency id"
+  local id="$1"
+  local dependency="$2"
+  local file dep remaining=()
+  local timestamp
+  file="$(active_task_path "$id")"
+  while IFS= read -r dep; do
+    [[ -n "$dep" && "$dep" != "$dependency" ]] && remaining+=("$dep")
+  done < <(dependency_ids "$(field_value "$file" depends_on)")
+  local IFS=,
+  timestamp="$(now)"
+  set_field "$file" depends_on "${remaining[*]}"
+  set_field "$file" updated "$timestamp"
+  printf '\n- %s: Removed dependency `%s`.\n' "$timestamp" "$dependency" >> "$file"
+  generate_board
+}
+
+print_ready_tasks() {
+  local status priority file current_status current_priority id title
+  for status in todo in-progress review; do
+    contains_word "$status" "$KANBAN_STATUSES" || continue
+    for priority in $KANBAN_PRIORITIES; do
+      while IFS= read -r file; do
+        [[ -n "$file" ]] || continue
+        current_status="$(field_value "$file" status)"
+        current_priority="$(field_value "$file" priority)"
+        [[ "$current_status" == "$status" && "$current_priority" == "$priority" ]] || continue
+        dependencies_satisfied "$file" || continue
+        id="$(field_value "$file" id)"
+        title="$(field_value "$file" title)"
+        printf '%s\t%s\t%s\t%s\n' "$id" "$current_status" "$current_priority" "$title"
+      done < <(active_files)
+    done
+  done
+}
+
+cmd_ready() {
+  local ready
+  ready="$(print_ready_tasks)"
+  if [[ -n "$ready" ]]; then
+    printf '%s\n' "$ready"
+  else
+    printf 'No ready tasks.\n'
+  fi
+}
+
+cmd_waiting() {
+  local file id status priority title blocked_by any=0
+  while IFS= read -r file; do
+    [[ -n "$file" ]] || continue
+    blocked_by="$(blocking_dependencies "$file")"
+    [[ -n "$blocked_by" ]] || continue
+    id="$(field_value "$file" id)"
+    status="$(field_value "$file" status)"
+    priority="$(field_value "$file" priority)"
+    title="$(field_value "$file" title)"
+    printf '%s\t%s\t%s\twaiting-on:%s\t%s\n' "$id" "$status" "$priority" "$blocked_by" "$title"
+    any=1
+  done < <(active_files)
+  [[ "$any" -eq 1 ]] || printf 'No waiting tasks.\n'
+}
+
+cmd_next() {
+  local next
+  next="$(print_ready_tasks | head -n 1)"
+  if [[ -n "$next" ]]; then
+    printf '%s\n' "$next"
+  else
+    printf 'No ready tasks.\n'
+  fi
+}
+
+archive_one() {
+  local id="$1"
+  local force="$2"
+  local file status year target timestamp
+  file="$(active_task_path "$id")"
+  status="$(field_value "$file" status)"
+  [[ "$status" == "done" || "$force" == "1" ]] || die "task must be done before archive: $id"
+  timestamp="$(now)"
+  year="$(date +%Y)"
+  mkdir -p "$archive_dir/$year"
+  set_field "$file" archived "$timestamp"
+  set_field "$file" updated "$timestamp"
+  target="$archive_dir/$year/$id.md"
+  mv "$file" "$target"
+  printf '%s\n' "$target"
+}
+
+cmd_archive() {
+  [[ $# -ge 1 ]] || die "archive requires task id or --done"
+  if [[ "$1" == "--done" ]]; then
+    local file id
+    while IFS= read -r file; do
+      [[ -n "$file" ]] || continue
+      [[ "$(field_value "$file" status)" == "done" ]] || continue
+      id="$(field_value "$file" id)"
+      archive_one "$id" "0" >/dev/null
+    done < <(active_files)
+    generate_board
+    return 0
+  fi
+  local id="$1"
+  shift
+  local force="0"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --force) force="1"; shift ;;
+      --*) die "unknown option for archive: $1" ;;
+      *) die "unexpected argument for archive: $1" ;;
+    esac
+  done
+  archive_one "$id" "$force" >/dev/null
+  generate_board
+}
+
+cmd_validate() {
+  local seen tmp file id status priority title deps dep failed=0
+  tmp="$(mktemp)"
+  while IFS= read -r file; do
+    [[ -n "$file" ]] || continue
+    id="$(field_value "$file" id)"
+    title="$(field_value "$file" title)"
+    status="$(field_value "$file" status)"
+    priority="$(field_value "$file" priority)"
+    deps="$(field_value "$file" depends_on)"
+    if [[ -z "$id" || -z "$title" || -z "$status" || -z "$priority" ]]; then
+      printf 'missing required metadata: %s\n' "$file" >&2
+      failed=1
+      continue
+    fi
+    if [[ "$(basename "$file" .md)" != "$id" ]]; then
+      printf 'filename/id mismatch: %s\n' "$file" >&2
+      failed=1
+    fi
+    if ! contains_word "$status" "$KANBAN_STATUSES"; then
+      printf 'invalid status in %s: %s\n' "$file" "$status" >&2
+      failed=1
+    fi
+    if ! contains_word "$priority" "$KANBAN_PRIORITIES"; then
+      printf 'invalid priority in %s: %s\n' "$file" "$priority" >&2
+      failed=1
+    fi
+    while IFS= read -r dep; do
+      [[ -n "$dep" ]] || continue
+      if [[ "$dep" == "$id" ]]; then
+        printf 'self dependency in %s: %s\n' "$file" "$dep" >&2
+        failed=1
+      elif [[ -z "$(task_path "$dep")" ]]; then
+        printf 'missing dependency in %s: %s\n' "$file" "$dep" >&2
+        failed=1
+      fi
+    done < <(dependency_ids "$deps")
+    printf '%s\n' "$id" >> "$tmp"
+  done < <(find "$tasks_dir" "$archive_dir" -type f -name "${KANBAN_TASK_PREFIX}-*.md" -print 2>/dev/null | sort)
+  if [[ -s "$tmp" ]]; then
+    seen="$(sort "$tmp" | uniq -d)"
+    if [[ -n "$seen" ]]; then
+      printf 'duplicate task ids:\n%s\n' "$seen" >&2
+      failed=1
+    fi
+  fi
+  rm -f "$tmp"
+  [[ "$failed" -eq 0 ]] || exit 1
+  generate_board
+  printf 'Kanban board valid: %s\n' "$KANBAN_ROOT"
+}
+
+main() {
+  [[ $# -gt 0 ]] || { usage; exit 0; }
+  load_config
+  ensure_layout
+  local command="$1"
+  shift
+  case "$command" in
+    create) cmd_create "$@" ;;
+    list) cmd_list "$@" ;;
+    board) generate_board; cat "$board_file" ;;
+    show) cmd_show "$@" ;;
+    move) cmd_move "$@" ;;
+    note) cmd_note "$@" ;;
+    depend) cmd_depend "$@" ;;
+    undepend) cmd_undepend "$@" ;;
+    ready) cmd_ready "$@" ;;
+    waiting) cmd_waiting "$@" ;;
+    next) cmd_next "$@" ;;
+    archive) cmd_archive "$@" ;;
+    validate) cmd_validate "$@" ;;
+    help|--help|-h) usage ;;
+    *) die "unknown command: $command" ;;
+  esac
+}
+
+main "$@"
