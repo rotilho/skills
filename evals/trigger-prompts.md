@@ -6,9 +6,13 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 
 | Prompt | Expected skill | Why |
 |---|---|---|
+| "Capture the reusable debugging procedure we learned and put it in the existing source skill." | `auto-skill-capture` | Retaining an uncovered procedural lesson. |
+| "Review every skill's purpose and overlap; remove instructions that add no value." | `skill-library-curator` | Library-wide curation before wording changes. |
 | "Refactor this function for clearer naming and ownership without using framework-specific rules." | `code-practice` | Framework-neutral maintainability. |
 | "Diagnose this failing workflow first, then make the smallest compatibility-preserving API change and test the contract directly." | `code-practice` | Evidence-first diagnosis, public-surface safety, and test-level choice without framework specifics. |
-| "This module is organized by services and utils; move behavior toward the workflow that owns the state and side effects." | `code-practice` | Behavior ownership and state boundaries in a language-neutral design prompt. |
+| "Reorganize this module's files around its existing workflows and improve generic names; keep component interactions and state ownership unchanged." | `code-practice` | File organization and naming without redesigning component collaboration. |
+| "Update these Java unit tests and keep every changed test visibly split into Given, When, and Then sections." | `code-practice` | Given/When/Then is a language-agnostic code-test readability convention. |
+| "This service uses two concurrent maps, mutable sets inside their values, and an aggregate limit counter. Two limit branches run the same drop callback; simplify them without breaking the guarded check-and-update invariant or moving event publication into the critical section." | `code-practice` | Framework-neutral compound-invariant and locking-strategy review. |
 | "Class A calls five collaborators today. Should it keep direct calls or publish one event and let each owner react?" | `component-collaboration-architecture` | Collaboration shape and ownership decision. |
 | "This listener just forwards events to another service. Refactor the flow so behavior and state ownership are clearer." | `component-collaboration-architecture` | Proxy/listener removal across components. |
 | "AccountService owns the account state change, but it now imports vote cleanup to mark old votes stale. Break the dependency so the source-of-truth update can notify the downstream cleanup owner." | `component-collaboration-architecture` | Source-of-truth to downstream cleanup boundary should be a collaboration-shape decision. |
@@ -17,8 +21,10 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Research current options for hosted vector databases and recommend one with sources." | `deep-research` | Multi-source evidence-backed research. |
 | "Create a DESIGN.md from these screenshots, Tailwind config, and brand notes; count which references support each section and flag inconsistencies." | `design-extractor` | DESIGN.md extraction with evidence counts and conflicts. |
 | "Use a temporary Podman image to install a RAW converter and write the converted files to /tmp without installing anything on the host." | `ephemeral-container-workbench` | One-off tool installation isolated in a disposable container. |
+| "Build this project's GraalVM native binary in Podman using the same toolchain as CI." | `graalvm-native-build` | Native-image build and toolchain parity. |
 | "Clean up these Kotlin extensions, nullability checks, and coroutine scope ownership." | `kotlin-code-style` | Kotlin-specific implementation style. |
 | "In this Kotlin multiplatform library, replace runtime platform branches with source-set-owned behavior and add validation tests with positive, negative, round-trip, and boundary cases." | `kotlin-code-style` | Kotlin library style, expect/actual boundaries, validation, and test shape. |
+| "Format these Kotlin changes with the repository's ktlint task and run the focused Gradle test in a sandbox where the default Gradle home is read-only." | `kotlin-code-style` | Kotlin-specific formatting and focused Gradle verification workflow. |
 | "Review these Kotlin Cucumber feature files and step definitions for BDD quality." | `kotlin-cucumber-tests` | Cucumber feature/step design. |
 | "Turn this async workflow into Kotlin Cucumber scenarios where step glue hides protocol details and polls for observable outcomes." | `kotlin-cucumber-tests` | Workflow-level Cucumber with async outcome boundaries. |
 | "Take a screenshot of my localhost app with Playwright now that browsermcp is gone." | `playwright-screenshots` | Headless browser screenshot capture without browsermcp. |
@@ -26,21 +32,34 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Capture mobile and full-page screenshots of this generated HTML page using a headless browser." | `playwright-screenshots` | Screenshot workflow with viewport/full-page options. |
 | "Improve this Spring Boot controller/service/repository package structure and transaction boundary." | `spring-application-code-style` | Spring application architecture. |
 | "Clean up this Spring Boot app so controllers stay thin, feature config validates at startup, and async event tests prove downstream observable state." | `spring-application-code-style` | Spring application edges, configuration, async events, and validation. |
+| "Run these Spring Boot AOT-backed Gradle test tasks without colliding on processTestAot output." | `spring-application-code-style` | Spring AOT verification and generated-output ownership. |
 | "Decide where this architecture decision belongs in the repo wiki and link related pages." | `wiki` | Durable knowledge-base organization. |
+| "Create a local Markdown Kanban board with task dependencies for this repo." | `local-kanban-board` | Persistent repo-local task tracking. |
+| "Use Kanban with planner and executor subagents; keep the main session reviewing persisted plans and completed work." | `orchestrated-kanban-subagents` | Requested coordination model with plans and review. |
+| "Resume the Kanban project as coordinator, reviewing task plans before dispatching workers." | `orchestrated-kanban-subagents` | Resumption of the same coordination model. |
 
 ## Near misses / should not trigger
 
 | Prompt | Skill that should stay inactive | Better fit |
 |---|---|---|
+| "We read twelve files and ran the existing tests; nothing new was learned. Summarize the result." | `auto-skill-capture` | Normal task reporting. |
+| "Write one new skill for inspecting archive contents." | `skill-library-curator` | `create-skill` |
+| "Use a subagent to review this small patch." | `orchestrated-kanban-subagents` | Ordinary delegated review. |
+| "Move TASK-003 to review on the local board." | `orchestrated-kanban-subagents` | `local-kanban-board` |
+| "Make a quick checklist in the PR description." | `local-kanban-board` | Normal prose editing. |
+| "Run the normal JVM unit tests with the existing Gradle wrapper." | `graalvm-native-build` | The repository's verification workflow. |
 | "Rename this helper and simplify the nested conditionals." | `component-collaboration-architecture` | `code-practice` |
 | "Fix a Kotlin Cucumber step definition that leaks scenario state." | `kotlin-code-style` | `kotlin-cucumber-tests` |
 | "Explain how to wire a Spring `@ConfigurationProperties` class." | `kotlin-code-style` | `spring-application-code-style` |
 | "Make this plain Kotlin value object idiomatic." | `spring-application-code-style` | `kotlin-code-style` |
 | "Write generic unit tests for a pure function." | `kotlin-cucumber-tests` | `code-practice` or language-specific test style |
+| "Add Given, When, and Then sections to these Java tests." | `kotlin-code-style` | `code-practice` |
+| "Show the Java `ConcurrentHashMap.computeIfAbsent` API for computing one independent value per key." | `code-practice` | Java/JDK API documentation |
 | "Add boundary and malformed-input tests for this Kotlin serializer." | `kotlin-cucumber-tests` | `kotlin-code-style` |
 | "Review whether this event listener should be direct call or event projection across three components." | `spring-application-code-style` | `component-collaboration-architecture` |
 | "Explain how to declare a Spring `@EventListener` method for an existing event." | `component-collaboration-architecture` | `spring-application-code-style` |
 | "Fix this Spring-free coroutine mutex race in a plain Kotlin library." | `spring-application-code-style` | `kotlin-code-style` |
+| "Format this plain Kotlin module and run one focused unit test." | `spring-application-code-style` | `kotlin-code-style` |
 | "Summarize this provided note more briefly." | `deep-research` | `concise` |
 | "Make this dashboard visually cleaner without producing a DESIGN.md." | `design-extractor` | Frontend design or implementation guidance |
 | "Add this CLI to the project Dockerfile so CI can use it." | `ephemeral-container-workbench` | Project container/toolchain maintenance |
@@ -58,6 +77,7 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 - "Add a Kotlin Flow endpoint in a Spring WebFlux app; keep coroutine ownership and Spring boundaries clear."
 - "Turn these product acceptance notes into Cucumber scenarios and Kotlin step glue without coupling to DTO field names."
 - "Using the current code in node and commons only as evidence, extract reusable engineering style guidance without creating a product-specific skill."
+- "Update a mixed Java and Kotlin test fixture so all changed code-based tests have Given/When/Then sections, Kotlin is formatted before focused verification, and independent Spring AOT invocations do not write the same generated output concurrently."
 - "Audit this local docs folder, merge duplicate knowledge, and create only the durable wiki pages that have clear owners."
 
 ## Pass criteria

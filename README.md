@@ -26,7 +26,7 @@ User-owned active skills:
 
 | Skill | Use when | Avoid when |
 |---|---|---|
-| `auto-skill-capture` | Creating or updating global or repo-local reusable skills after complex, repeated, correction-heavy, tricky-debugging, or environment-specific work. | The work is routine, one-off, private, temporary, or should remain a task log. |
+| `auto-skill-capture` | Capturing a reusable procedural gap revealed by work, corrections, diagnosis, or environment setup. | The lesson is already covered, routine, private, temporary, or only a task outcome. |
 | `code-practice` | Framework-neutral code quality, behavior ownership, evidence-first debugging, trust boundaries, state ownership, compatibility, tests, refactoring. | Kotlin, Spring, or Cucumber-specific rules dominate. |
 | `component-collaboration-architecture` | Choosing direct calls, orchestration, domain events, observers, projections, state ownership, proxy removal, and source-of-truth to downstream dependency boundaries. | The task is only local cleanup, language idioms, framework wiring, or test glue. |
 | `concise` | Default concise communication, brief updates, tighter rewrites. | User asks for fuller, warmer, formal, legal, or safety-sensitive detail. |
@@ -34,8 +34,11 @@ User-owned active skills:
 | `deep-research` | Evidence-backed research, comparisons, audits, and gap-first source validation. | Routine local code or prompt review with no research need. |
 | `design-extractor` | Create or audit `DESIGN.md` from screenshots, Figma, CSS, tokens, brand notes, or app references, including evidence counts and conflicts. | Ordinary frontend implementation when no durable `DESIGN.md` or design extraction is requested. |
 | `ephemeral-container-workbench` | Running one-off tools, converters, SDKs, or package installs in a temporary Podman/Docker container instead of mutating the host. | The repo already owns the toolchain, a long-lived service is needed, or the user wants the dependency installed locally. |
+| `graalvm-native-build` | Building or diagnosing GraalVM native images in disposable containers with the project's toolchain and CI settings. | Ordinary JVM builds or unrelated temporary tooling. |
 | `kotlin-code-style` | Kotlin file/type organization, concept-owned helpers, validation shape, multiplatform source sets, nullability, coroutines, Flow, tests. | Spring architecture or Cucumber/BDD is central. |
 | `kotlin-cucumber-tests` | Kotlin Cucumber workflow scenarios, feature files, steps, hooks, fixtures, async outcomes, and executable specs. | Generic unit tests, dense validator/serializer cases, plain Kotlin style, or Spring test architecture. |
+| `local-kanban-board` | Creating or maintaining repo-local Markdown task tracking, dependencies, and resumable board state. | One-off checklists or external project trackers. |
+| `orchestrated-kanban-subagents` | Coordinating requested Kanban work through task-scoped planners, executors, and review, with persisted plans and results. | Ordinary subagent use or task tracking without this coordination model. |
 | `playwright-screenshots` | Browser screenshots, visual verification, page smoke tests, or headless browser capture without browsermcp. | The task needs the user's already-open browser session, extensions, active tabs, or existing cookies. |
 | `skill-library-curator` | Periodic curation of global or repo-local skills, duplicate merges, promotions, embeddings, archive moves, vague skill cleanup, and curation reports. | Creating one new skill without reviewing the broader library. |
 | `spring-application-code-style` | Spring Boot application package structure, thin controllers, feature-owned config, events, validation boundaries, transactions, wiring, integration tests. | Plain Kotlin, framework-neutral code quality, or Spring internals/libraries. |
