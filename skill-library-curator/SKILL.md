@@ -1,7 +1,7 @@
 ---
 name: "skill-library-curator"
-version: "1.2.1"
-description: "Review, improve, merge, promote, embed, deduplicate, and archive global or repo-local Agent Skills. Use for periodic skill library curation in a resolved <global-skill-source> or <repo-local-skill-source>, vague or outdated skill cleanup, duplicate consolidation, archive planning, and curation reports."
+version: "1.3.0"
+description: "Review and improve a global or repo-local Agent Skill library. Use for periodic curation, unclear or outdated instructions, duplicate consolidation, local-to-global promotion, archive moves, and curation reports."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -11,125 +11,48 @@ metadata:
 
 # Skill Library Curator
 
-Use this skill to keep global and repo-local user-owned skill libraries coherent, current, and deduplicated.
+Keep user-owned skill libraries useful and coherent. For authoring one skill without reviewing the library, use `create-skill`.
 
-## Reference files
+## 1. Establish scope and baseline
 
-- Read `references/curation-policy.md` before reviewing or patching skills.
-- Read `references/merge-policy.md` before merging, promoting, embedding, or archiving skills.
-- Use `templates/curation-report-template.md` for the final curation report.
+Resolve the requested source roots from the user and local agent context, including `SELF-IMPROVE.md` when present. Global sources hold reusable user-owned skills; repo-local sources usually live at `<target-repo>/.agents/skills`. Use concrete paths for operations and keep machine bindings out of reusable skill content. Ask only if a source needed for a write remains ambiguous.
 
-## When to use
+Inspect the worktree before changing it and preserve unrelated edits. Inventory every candidate package in scope, including its `SKILL.md`, README, and bundled support files. Exclude archives, scratch output, caches, and generated installs from the active library. Inspect/report externally owned packages when included in scope, but do not modify vendor, registry/package-managed, or submodule skills without explicit authorization. Installed copies are not source.
 
-Trigger for work like:
-- periodically review the user-owned skills library
-- improve vague, stale, overlapping, or hard-to-trigger skills
-- merge clear duplicates
-- promote repo-local skills that have become globally reusable
-- embed thin or overlapping skills into a better local or global owner
-- archive unused or superseded skills
-- produce a skill curation report
+## 2. Judge purpose before wording
 
-Do not use for creating one new skill from a fresh workflow unless the task also asks to review or curate the broader library.
+For each skill, determine the task it enables and the behavior its instructions improve. Challenge its assumptions, overlap, and procedural cost. Existing or lengthy content is not evidence that it is necessary.
 
-## Local skill location bindings
+Leave useful guidance alone. Delete duplicated, obsolete, or obvious instructions before reorganizing them; moving unnecessary policy into references does not make it useful. Add requirements only to address a demonstrated gap. A small skill can have a valid independent purpose.
 
-Before curating, resolve these placeholders from local `skill_locations` in `SELF-IMPROVE.md` or equivalent local agent context:
+Record a judgement and reason for each inspected skill:
 
-- `<global-skill-source>`: source checkout for reusable global/user-owned skills
-- `<repo-local-skill-source>`: repo-local source, usually `<target-repo>/.agents/skills`
-- `<installed-skill-root>`: configured generated installed skill locations
-- `<global-refresh-command>`: local command that syncs `<global-skill-source>` into the configured installed skill targets
+- `keep`: useful and current.
+- `patch`: valid purpose with a concrete content or activation gap.
+- `merge`: shared purpose and trigger boundary justify one owner.
+- `promote`: repo-local content now works across repos.
+- `embed`: a variant or caveat belongs inside an existing owner.
+- `archive`: superseded or no longer useful as an active skill.
+- `exclude`: outside the editable source boundary or ownership unclear.
 
-Do not replace these placeholders inside reusable skill source files. Use the resolved local values only for actual filesystem operations, archive paths, reports, and refresh commands. If a needed binding is missing or still ambiguous, ask the user before touching files.
+Similar words do not establish duplication. Keep general base layers separate from domain-specific workflows when both improve behavior. Do not merge different tool/runtime instructions or purposes merely to reduce skill count. If ownership or a safe consolidation is unclear, keep the skills and report the unresolved decision.
 
-## Hard constraints
+## 3. Apply justified changes
 
-- Treat the resolved `<global-skill-source>` as the global user-owned skills source.
-- Treat the resolved `<repo-local-skill-source>` as the repo-local user-owned skills source.
-- Inspect the requested source root before modifying anything.
-- Do not modify vendor, bundled, third-party, registry-installed, package-managed, or git-submodule skills unless explicitly requested.
-- Do not edit installed or generated copies under `~/.agents/skills`, `~/.codex/skills`, `~/.claude/skills`, `.codex/skills`, `.claude/skills`, or generated skill directories unless explicitly asked.
-- Patch vague or outdated skills in place when their identity is still valid.
-- Merge clear duplicates into the strongest target skill.
-- Promote repo-local skills to global only when their reusable content is no longer repo-bound.
-- Embed a skill into another skill when it is only a caveat, workflow variant, pitfall, or verification step for the target.
-- Never delete a skill immediately; archive instead.
-- Archive full global skill packages under the resolved `<global-skill-source>/.archive/YYYY-MM-DD/<skill-name>/`.
-- Archive full repo-local skill packages under the resolved `<repo-local-skill-source>/.archive/YYYY-MM-DD/<skill-name>/`.
-- Preserve `SKILL.md`, `README.md`, `references/`, `templates/`, `scripts/`, `assets/`, and any other support files when archiving.
-- Produce a curation report after changes.
-- After global changes, run the resolved `<global-refresh-command>`.
-- Do not broaden refresh scope with CLI shortcuts such as `--all`; use the resolved command exactly.
-- For repo-local-only changes, verify files and report that no global install was needed.
+Patch in place when the identity remains valid. For merges, promotion, or embedding:
 
-## Procedure
+1. Read the full source and target packages. Choose a target with a clear name, appropriate trigger boundary, and useful existing support.
+2. Move only unique guidance and support files the target still needs. Resolve conflicting rules against current evidence and explicit user constraints.
+3. Promote content only when it works outside the source repo after removing repo-specific assumptions. If removing those assumptions makes it vague, keep it local.
+4. Update trigger boundaries and support links without broadening the target beyond its purpose.
+5. Archive the superseded package under its source root at `.archive/YYYY-MM-DD/<skill-name>/`, with an `ARCHIVE_NOTE.md` naming the reason and target. Preserve the complete package and check for destination collisions before moving it.
 
-1. Choose curation mode.
-   - `global`: inspect and change the resolved `<global-skill-source>`.
-   - `repo-local`: inspect and change the resolved `<repo-local-skill-source>`.
-   - `mixed`: inspect both roots when deciding whether a local skill should stay local, promote to global, or embed into another skill.
+Archive whole skills by default; permanent deletion requires explicit authorization. Obsolete or duplicated support files can be removed as part of an authorized package cleanup. Do not discard unrelated user work.
 
-2. Inventory the library.
-   - List root-level skill directories under the selected source root.
-   - Exclude `.git`, `.archive`, package caches, generated install folders, and clearly external/vendor directories.
-   - Note missing `SKILL.md`, invalid frontmatter, weak descriptions, duplicate names, and overlapping triggers.
+## 4. Verify and report
 
-3. Classify each candidate.
-   - `keep`: clear, current, and non-overlapping.
-   - `patch`: useful but vague, outdated, bloated, or missing verification.
-   - `merge`: clear duplicate or near-duplicate with another user-owned skill.
-   - `promote`: repo-local skill should become global or be merged into a global skill.
-   - `embed`: skill should be folded into a better local or global target skill.
-   - `archive`: superseded, empty, unsafe, or no longer useful.
-   - `exclude`: vendor, package-managed, third-party, or submodule-owned.
+Bump versions for behavior changes. Check frontmatter, name/folder agreement, support links, and complete archives. Check positive and near-miss prompts when triggers change. Test changed behavior with realistic isolated scratch tasks using `create-skill`'s verification procedure when available; do not treat trigger selection alone as behavioral proof.
 
-4. Patch skills conservatively.
-   - Keep `SKILL.md` compact and trigger-oriented.
-   - Move long policy, examples, and templates into bundled files.
-   - Preserve useful support files and existing skill identity.
-   - Use ordinary file operations as a fallback if a skills CLI is unavailable.
+For global changes, run the configured refresh command with its exact agent scope unless the user requested source-only work. Do not substitute `--all` for a scoped install. A missing refresh command need not block source work: report refresh as incomplete. Repo-local-only changes do not need a global refresh.
 
-5. Merge, promote, or embed carefully.
-   - Choose the target skill with the clearest name, strongest trigger, and best support files.
-   - Move unique reusable content into the target package.
-   - Strip repo-specific facts before promoting content to global.
-   - Prefer embedding over keeping a thin duplicate skill active.
-   - Remove task logs, stale examples, and private details during the merge, promotion, or embedding.
-   - Archive the superseded package instead of deleting it.
-
-6. Archive instead of deleting.
-   - Create the matching `.archive/YYYY-MM-DD/` under the source root.
-   - Move the entire superseded skill directory under that date folder.
-   - Preserve every support file unless the user explicitly asks for cleanup.
-   - Add `ARCHIVE_NOTE.md` explaining the archive reason and target skill when applicable.
-
-7. Verify and install.
-   - Check frontmatter names match folder names for active skills.
-   - Check no active duplicate names remain.
-   - Check archived skills are complete packages.
-   - Run the resolved `<global-refresh-command>` only if global skills changed.
-
-8. Report the outcome.
-   - Use the curation report template.
-   - Include scope, inspected skills, patches, merges, promotions, embeddings, archives, exclusions, install result, and residual risks.
-
-## Pitfalls
-
-- Do not treat installed/generated copies as source.
-- Do not silently rewrite a specialized skill into a generic one.
-- Do not archive a skill just because it is small.
-- Do not merge skills with similar words but different trigger boundaries.
-- Do not promote local product vocabulary, repo paths, secrets, or operational facts into global skills.
-- Do not leave a superseded local skill active after successful promotion or embedding.
-- Do not discard support files when moving a skill to the archive.
-
-## Verification
-
-- Source library was inspected before changes.
-- Every active skill has one `SKILL.md` with valid frontmatter.
-- Every modified skill remains triggerable and procedural.
-- Promoted global content is free of repo-only assumptions.
-- Archived packages include all original support files.
-- The curation report names what changed and why.
-- The resolved `<global-refresh-command>` was run and recorded when global skills changed, or the report states that no global install was needed.
+Report inspected scope, each skill's judgement, concrete changes and reasons, source/target/archive paths for moves, validation, refresh results, and unresolved decisions. Use a compact table or the user's requested format; create a separate report file only when requested or useful for resuming a large review. Omit empty change categories.

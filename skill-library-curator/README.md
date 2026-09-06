@@ -1,31 +1,12 @@
 # Skill Library Curator
 
-`skill-library-curator` helps agents maintain global and repo-local user-owned Agent Skills.
+Review the purpose, overlap, and maintenance cost of user-owned skills. Keep good guidance, remove rules that do not improve behavior, and consolidate only where one skill can clearly own the workflow.
 
-Use it for periodic reviews, vague skill cleanup, duplicate consolidation, local-to-global promotion, embedding thin skills into stronger skills, archive moves, and curation reports. It is intentionally conservative: patch useful skills, merge clear duplicates, promote only sanitized reusable content, and archive instead of deleting.
+`SKILL.md` contains the full review, merge, promotion, archive, and verification procedure. Local agent instructions supply source roots and any global refresh command. Installed and externally owned packages stay read-only unless explicitly authorized.
 
-## Package Contents
+Examples:
 
-- `SKILL.md` - compact curation workflow
-- `references/curation-policy.md` - inspection, classification, and patching policy
-- `references/merge-policy.md` - duplicate merge and archive policy
-- `templates/curation-report-template.md` - final report template
-
-## Skill Locations
-
-Reusable guidance uses placeholders for skill locations:
-
-- `<global-skill-source>` - source checkout for reusable global/user-owned skills
-- `<repo-local-skill-source>` - repo-local source, usually `<target-repo>/.agents/skills`
-- `<installed-skill-root>` - configured generated installed skill locations
-- `<global-refresh-command>` - local command that syncs global skills into the configured installed targets
-
-Each machine's local `SELF-IMPROVE.md` should define concrete `skill_locations` bindings. Agents should resolve those bindings at runtime instead of replacing placeholders in reusable skill source.
-
-## Usage Examples
-
-- "Review my skills library and patch vague skill descriptions."
-- "Find duplicate user-owned skills, merge the clear duplicates, and archive the old folders."
-- "Run a curation pass and produce a report, but do not touch vendor skills."
-- "Review this repo's local skills and promote any that now belong globally."
-- "Embed thin local skills into stronger existing skills when they do not need to stand alone."
+- "Review every skill and remove unnecessary complexity."
+- "Merge duplicate user-owned skills and archive the old packages."
+- "Review this repo's local skills for global promotion."
+- "Produce a curation report without changing vendor skills."

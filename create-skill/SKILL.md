@@ -1,6 +1,6 @@
 ---
 name: "create-skill"
-version: "1.0.1"
+version: "1.1.0"
 description: "Create or improve an agent skill. Use when the user wants a new `SKILL.md`, a rewrite of an existing skill, better trigger coverage, behavior simulation, trigger/overlap evaluation, tighter instructions, or a repeated workflow turned into a reusable skill."
 license: "MIT"
 compatibility: "opencode"
@@ -11,228 +11,44 @@ metadata:
 
 # Create Skill
 
-Use this skill to create, rewrite, or tighten reusable agent skills.
+Create, rewrite, or evaluate reusable agent instructions. Use `auto-skill-capture` to decide what to retain from completed work, and `skill-library-curator` for library-wide ownership and overlap decisions.
 
-Trigger for work like:
-- create a new skill from an idea, prompt, or workflow
-- improve an existing `SKILL.md`
-- make a skill trigger more reliably
-- review a skill's trigger coverage or overlap without necessarily editing it
-- tighten vague or repetitive instructions
-- split an oversized skill into cleaner sections or support files
+## 1. Establish the purpose and source
 
-## Core promise
+Infer the intended task, expected work product, runtime, and skill name from the request. Inspect existing skills and local instructions before writing. Edit the canonical user-owned source, preserving unrelated changes; installed/generated or third-party copies need explicit authorization.
 
-Produce a skill that is:
-- valid for the target runtime
-- easy to trigger correctly
-- procedural, not vague
-- short enough to stay usable
-- verified through trigger checks and realistic behavior simulation when behavior changed
+Choose an existing owner when the behavior fits its trigger boundary. Create a separate skill only for a distinct workflow. Do not expand an adjacent skill just because its name is similar.
 
-Do not stop at a draft unless the user asked for planning only.
+Write the description first: what the skill does, when it should activate, and the boundary with nearby skills. Aim for correct selection, including realistic near misses.
 
-## Hard constraints
+## 2. Write only the guidance that changes behavior
 
-Unless local runtime docs say otherwise:
-- create one folder per skill with `SKILL.md` inside it
-- use YAML frontmatter at the top of `SKILL.md`
-- only use recognized frontmatter fields: `name`, `version`, `description`, `license`, `compatibility`, `metadata`
-- keep `name` lowercase kebab-case, 1-64 chars, and matched to the folder name
-- keep `version` as a quoted semantic version string and bump it when skill behavior changes
-- write `description` for triggering, not as a topic label
-- always quote string-valued YAML frontmatter fields; do not leave them unquoted
-- keep the body lean; move bulky detail into `references/`, `scripts/`, or `assets/` when needed
-- when a skill's behavioral instructions change, run at least one realistic simulation where an agent applies the skill to produce the intended kind of output
+Use one folder containing `SKILL.md`. Create files directly unless the repo provides a useful scaffold; an installer is not needed to author instructions.
 
-If repo conventions and runtime rules conflict, follow the runtime rules.
+Follow the target runtime's frontmatter rules. For this library:
 
-## Working rule
+- Match a lowercase kebab-case `name` to the folder name, within the runtime's length limit.
+- Include `version`, `description`, `license`, `compatibility`, and `metadata`; quote string values.
+- Use a quoted semantic version and bump it when behavior changes.
+- Set license and compatibility from the actual package, not assumed defaults.
 
-Write the `description` first.
+Give the agent concrete actions, relevant prerequisites and failure handling, and a way to verify the result. Include examples or exclusion boundaries where they resolve a real ambiguity. Do not require a section for every category.
 
-It is the main trigger surface. A good body cannot fix a weak description.
+Delete instructions that repeat existing guidance, state the obvious, or add ceremony without affecting the outcome. Keep useful guidance intact. Add support files only for material worth retaining: long domain references, reusable assets, or scripts that make repeated work reliable. Link them from `SKILL.md` with when-to-read guidance.
 
-Make it say:
-- what the skill helps do
-- when it should trigger
-- nearby phrasings that should also trigger it
+## 3. Verify selection and behavior
 
-Bias slightly toward over-triggering rather than invisibility.
+When creating a skill or changing its trigger, check realistic should-trigger prompts and near misses against adjacent skills. Choose cases around the actual ambiguity; a fixed prompt count does not prove coverage.
 
-## Workflow
+For a new skill or a behavior-changing update, run a realistic isolated task simulation:
 
-### Step 1 - Frame the job
+- Give a subagent only the skill path, task, and raw input artifacts or target repo. Do not supply expected answers or intended fixes.
+- Have it produce the actual kind of work product the skill governs.
+- Put outputs under `.workbench/` or another scratch location outside the target repo. Target edits require explicit user authorization; use a disposable fixture for editing tests.
+- Inspect the result for the intended behavior and reusable gaps. Patch gaps and rerun only affected cases.
 
-Infer or confirm:
-- skill name
-- `new-skill` or `update-skill`
-- target runtime or repo
-- user goal
-- expected outputs
-- whether trigger optimization matters
+Trigger checks do not replace behavior simulation. If isolated agents are unavailable, use the closest realistic scratch exercise and report the limitation. Skip behavioral verification only for unchanged behavior, a trigger-only review, or an unavailable environment that a realistic fixture cannot replace; state the reason.
 
-If the user did not give a name, infer a short kebab-case one.
+Check final frontmatter, name/folder agreement, support links, and absence of unintended placeholders. Run the smallest relevant repo validation. Follow the configured refresh process for global source changes, preserving its agent scope, unless the user requested source-only work.
 
-### Step 2 - Inspect before writing
-
-Read local examples first.
-
-Check:
-- existing skills in the repo
-- local tone and section patterns
-- runtime docs for discovery or frontmatter rules
-
-Use local examples for style and runtime docs for validity.
-
-### Step 3 - Scaffold
-
-For a new skill, scaffold with:
-
-```bash
-npx skills init <skill-name>
-```
-
-Then replace every placeholder.
-
-If scaffolding misbehaves, clean up only what you created and continue.
-
-### Step 4 - Write the skill
-
-At minimum include:
-- a strong `description`
-- a clear title
-- activation guidance
-- step-by-step instructions
-- constraints or caveats
-- a verification checklist
-
-Prefer imperative guidance.
-
-Avoid:
-- mission-statement filler
-- repeated guidance across sections
-- long prose where a checklist works
-- unsupported frontmatter fields
-
-Frontmatter rule:
-- always write string-valued frontmatter fields as quoted YAML strings
-- this includes at least: `name`, `version`, `description`, `license`, `compatibility`, and string values inside `metadata`
-
-### Step 5 - Use support files only when they help
-
-If the skill needs large or reusable material, move it out of `SKILL.md`.
-
-Typical layout:
-
-```text
-skill-name/
-├── SKILL.md
-├── references/
-├── scripts/
-└── assets/
-```
-
-Use:
-- `references/` for long docs or domain guides
-- `scripts/` for repeatable deterministic work
-- `assets/` for templates or bundled files
-
-### Step 6 - Verify triggering
-
-Create a small eval set:
-- 3 should-trigger prompts
-- 3 near-miss should-not-trigger prompts
-
-Check that the description helps the agent choose this skill over adjacent ones.
-
-Use realistic prompts.
-
-### Step 7 - Simulate behavior
-
-For new skills or behavior-changing updates, run at least one realistic task simulation:
-- give the agent a small but concrete input artifact, code sample, document, or repo slice
-- ask it to apply the skill and produce the expected work product, not just choose the skill
-- keep the simulation scratch output under `.workbench/` or another ignored scratch path
-- inspect the output for the behavior the skill is supposed to cause
-- capture any gap by patching the skill or documenting why the simulation was skipped
-
-Examples:
-- for a code-style skill, have the agent edit a small code sample and test or explain the change
-- for a research skill, have the agent produce a sourced mini-brief from real sources
-- for a writing skill, have the agent rewrite a representative passage
-- for a workflow skill, have the agent execute the workflow against a tiny fixture
-
-Trigger-selection evals are not a substitute for behavior simulation. They only prove activation.
-
-Skip simulation only when:
-- the user explicitly asked for trigger-only review
-- the skill has no behavioral change
-- the required tool or environment is unavailable and a realistic scratch fixture cannot substitute
-
-When skipped, say exactly why.
-
-### Step 8 - Verify the artifact
-
-Check:
-- the folder exists where expected
-- `SKILL.md` is not scaffold boilerplate
-- `name` matches the folder name
-- frontmatter is valid and intentional
-- instructions are actionable
-- the skill is not longer than it needs to be
-
-If the repo has a skill check, run the smallest relevant one.
-
-## Default structure
-
-Use this shape unless local conventions clearly differ:
-
-```md
----
-name: "<skill-name>"
-version: "1.0.0"
-description: "<what it does and when to use it>"
-license: "<license>"
-compatibility: "<agent>"
-metadata:
-  audience: "<audience>"
-  workflow: "<workflow>"
----
-
-# <Title>
-
-## When to use
-
-## Core promise
-
-## Hard constraints
-
-## Workflow
-
-## Verification checklist
-```
-
-## Verification checklist
-
-Before finishing, confirm that you:
-- inspected local examples
-- matched the folder name and skill name
-- included a quoted `version`
-- wrote a triggerable description
-- quoted string-valued YAML frontmatter fields
-- removed scaffold placeholders
-- kept the skill concise
-- added support files only when needed
-- ran a realistic behavior simulation when the skill behavior changed, or stated why it was not possible
-- verified the final layout
-
-## Final answer style
-
-Report back with:
-- what skill was created or updated
-- which files changed
-- what improved in triggering or structure
-- what behavior simulation was run, if any
-- any limitations or open risks
-- what you verified
+Report the skill changed, the behavior improved, verification performed, and any unresolved limitation. Complete the artifact unless the user asked only for a plan or review.
