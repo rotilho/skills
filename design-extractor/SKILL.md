@@ -1,6 +1,6 @@
 ---
 name: "design-extractor"
-version: "1.0.0"
+version: "1.0.1"
 description: "Create, audit, or refresh a DESIGN.md design-system file from visual and product references such as screenshots, Figma exports, existing CSS, Tailwind configs, design tokens, brand notes, sample pages, or app UI. Use when the task asks for DESIGN.md, design extraction, design-system inference, or converting scattered design evidence into structured tokens and guidance. Count the source references used for each section or major token group, and surface conflicts, inconsistencies, and inferred decisions instead of hiding uncertainty."
 license: "MIT"
 compatibility: "opencode"
@@ -29,16 +29,6 @@ Trigger for work like:
 - identify conflicts between visual references, implementation tokens, and written design guidance
 
 Do not use this skill for ordinary frontend implementation when no durable `DESIGN.md` or design-system extraction is requested.
-
-## Core promise
-
-Produce a `DESIGN.md` that:
-- follows the bundled `DESIGN.md` spec
-- separates normative tokens from explanatory prose
-- is grounded in inspected references
-- counts source support for the extracted design choices
-- names conflicts, inconsistencies, weak evidence, and inferred decisions
-- remains useful to future coding agents building UI from the design system
 
 ## Hard constraints
 
@@ -81,7 +71,7 @@ If you inspect inactive components, unused assets, or older source files only to
 
 ### Step 2 - Build an evidence matrix
 
-Before writing `DESIGN.md`, create a compact working matrix. Persist it as `evidence-matrix.md` for non-trivial extractions, isolated skill tests, audits, or refreshes where future reviewers need to see the raw support trail. For small one-off extractions, it may live inside `## Extraction Notes` or the final response instead.
+Before writing `DESIGN.md`, create a compact working matrix. Keep it in `## Extraction Notes` or the final response; use an `evidence-matrix.md` sidecar when the support trail is too large to include there or the user requests one.
 
 ```md
 | Area | Candidate choice | Supporting refs | Count | Conflicts / inconsistencies | Confidence |
@@ -126,14 +116,12 @@ When a repo contains multiple generations of UI, classify evidence as active, le
 
 Create the smallest token set that can reproduce the observed system:
 - colors: semantic roles, surfaces, text colors, outlines, error states, and repeated accents
-- typography: usually 5-12 levels unless the references clearly support more
+- typography: the levels and properties supported by the references
 - rounded: named scale values used by real components
 - spacing: base unit, gaps, margins, container widths, and repeated component padding
 - components: buttons, inputs, cards, lists, badges, navigation, and domain-specific components with variants as separate keys
 
 Translate platform units into spec-valid dimensions. For example, Compose `dp` and web `px` can become `px`; Compose `sp` may become `px` only when you record that it is a platform-to-spec conversion. If line height, letter spacing, or font weight is implicit in the source, omit it or mark it inferred instead of guessing silently.
-
-Prefer reference-friendly token names. If a source scale uses keys that are awkward in `{path.to.token}` references, such as `2xl` or `3xl`, map them to clear aliases like `xxl` or `xxxl` and document the mapping in extraction notes.
 
 Keep one-off decoration in prose unless it appears as a reusable system rule.
 
@@ -206,14 +194,7 @@ Use `## Extraction Notes` unless the user requests a clean production-only `DESI
 
 If the user wants no extraction notes inside `DESIGN.md`, put the same counts and conflicts in a sidecar note or final response.
 
-### Step 5.5 - Write sidecar artifacts when useful
-
-Use sidecar artifacts when the extraction is a test run, audit, rerun, or large enough that embedding every detail in `DESIGN.md` would make it noisy:
-
-- `evidence-matrix.md`: full source ID inventory, active/legacy/unused classification, candidate choices, support counts, conflicts, confidence, and inferred decisions.
-- `final-report.md`: files written, inspected/used reference counts, conflicts and inconsistencies found, linter/manual validation results, target repo git status when applicable, and any skill ambiguity or missing instruction discovered during the run.
-
-For isolated skill tests, write sidecars to the requested scratch or workbench directory and do not modify the target repo unless the user explicitly asks. For production repo updates, write sidecars next to `DESIGN.md` only when the user asked for traceability or the extraction has meaningful uncertainty.
+For isolated skill tests, write requested artifacts to the scratch or workbench directory and do not modify the target repo unless the user explicitly asks.
 
 ### Step 6 - Validate
 
@@ -230,17 +211,4 @@ Before finishing:
 - if validation tooling is unavailable, blocked by sandbox/network/package resolution, or intentionally skipped, report that the linter did not run and perform the manual checks above
 - never claim linter results unless the linter command actually ran; keep manual validation and linter validation as separate report items
 
-## Verification checklist
-
-Before finishing, confirm that you:
-- read the spec or relied on a freshly read relevant excerpt
-- assigned source IDs to references
-- counted inspected and used references
-- included support counts by section or major token group
-- surfaced conflicts and inconsistencies
-- labeled inferred or low-confidence decisions
-- persisted or summarized the evidence matrix
-- produced a final report for test, audit, or rerun workflows
-- wrote valid `DESIGN.md` frontmatter and section structure
-- validated manually or with the DESIGN.md linter
-- stated whether generated/prior target artifacts were used, compared, or excluded
+Report the files written, source counts, unresolved conflicts or inferences, and validation results. Use a separate report file only when requested.
