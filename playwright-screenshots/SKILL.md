@@ -1,6 +1,6 @@
 ---
 name: "playwright-screenshots"
-version: "1.0.0"
+version: "1.0.1"
 description: "Use when a task needs browser screenshots, visual verification, page smoke tests, or headless browser capture after browsermcp is unavailable or unnecessary. Prefer Playwright for localhost, static files, generated pages, and unauthenticated pages; note when a live user browser session is required instead."
 license: "MIT"
 compatibility: "codex"
@@ -21,45 +21,39 @@ Use this skill when the user asks to:
 
 Do not use this skill when the task requires the user's already-open browser state, Chrome extensions, active tabs, or existing logged-in cookies. In that case, say that a browser bridge or exported auth state is required.
 
-## Core promise
-
-Prove screenshot capability with a real browser launch and a generated image, not just a successful package install.
-
 ## Workflow
 
-1. Check basic tooling:
+1. Reuse the project's installed Playwright or browser tooling when available. Otherwise, check Node and npm before using `npx`:
 
 ```bash
 node --version
 npm --version
-npx --yes playwright --version
 ```
 
-2. If Playwright runs but the browser is missing, install the needed browser:
+2. Capture the requested page. For project pages, use the running dev server's URL and adapt the viewport or full-page option to the task:
+
+```bash
+npx --yes playwright screenshot --viewport-size=390,844 --full-page http://127.0.0.1:8080 /tmp/page.png
+```
+
+Wait for the page's required content or state when needed. A fixed delay alone does not prove it is ready.
+
+3. If capture fails because Chromium is missing, install the browser with the same Playwright version and retry:
 
 ```bash
 npx --yes playwright install chromium
 ```
 
-3. Take a smoke-test screenshot before relying on the workflow:
+4. If the failure's source is unclear, capture a tiny static page to separate browser setup from application problems:
 
 ```bash
 npx --yes playwright screenshot "data:text/html,%3Ch1%3EPlaywright%20screenshot%20works%3C%2Fh1%3E" /tmp/playwright-smoke.png
-file /tmp/playwright-smoke.png
 ```
 
-4. Inspect the image with the available local image viewer when possible.
-
-5. For project pages, prefer a local URL from the running dev server:
+5. Check the output and inspect it with the available local image viewer when visual correctness matters:
 
 ```bash
-npx --yes playwright screenshot http://127.0.0.1:8080 /tmp/page.png
-```
-
-6. If the page needs waiting, viewport size, or full-page capture, use CLI options:
-
-```bash
-npx --yes playwright screenshot --wait-for-timeout=1000 --viewport-size=390,844 --full-page http://127.0.0.1:8080 /tmp/mobile-full-page.png
+file /tmp/page.png
 ```
 
 ## Constraints
@@ -73,8 +67,6 @@ npx --yes playwright screenshot --wait-for-timeout=1000 --viewport-size=390,844 
 ## Verification checklist
 
 Before saying Playwright works, confirm:
-- `npx --yes playwright --version` succeeds
-- a browser binary is installed or launched successfully
 - a screenshot command exits 0
 - the output file is a valid non-empty PNG
 - the image was inspected when visual correctness matters

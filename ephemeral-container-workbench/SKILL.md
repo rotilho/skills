@@ -1,6 +1,6 @@
 ---
 name: "ephemeral-container-workbench"
-version: "1.0.0"
+version: "1.0.2"
 description: "Use when a task needs installing rarely used CLI tools, converters, SDKs, package managers, or system dependencies and the work can be isolated in a temporary Podman or Docker container instead of mutating the host. Trigger for phrases like throwaway container, temporary image, use podman/docker for this install, one-off dependency, or run a conversion/tooling job without installing locally."
 license: "MIT"
 compatibility: "opencode"
@@ -37,7 +37,7 @@ Do not use when:
 ## Procedure
 
 1. Establish the host-side baseline.
-   - Confirm the input path exists and count the expected inputs.
+   - Confirm the inputs exist and identify the expected outputs.
    - Create the output directory before running the container.
    - Decide whether outputs should be temporary (`/tmp/...`) or durable (workspace path).
 
@@ -53,41 +53,27 @@ Do not use when:
    - Add `--security-opt label=disable` for Podman bind mounts on SELinux hosts when the container cannot read or write mounted paths.
    - Pass secrets through environment variables only when required, and do not persist them in scripts, skills, logs, or final summaries.
 
-4. Test one representative item first.
-   - Install the required tools inside the container.
-   - Convert or process one small input.
-   - Verify the output from the host using native inspection tools.
-   - Only then run the full batch.
-
-5. Run the batch with progress and failure accounting.
+4. Install tools and run the operation inside the same disposable container.
+   - Use a direct command for a one-off operation; create a reusable script only when repetition warrants it.
+   - For a large or costly batch, test one representative input before committing to the full run. A single input producing several outputs does not by itself need a separate pilot.
    - Use strict shell mode inside the container when practical: `set -euo pipefail`.
-   - Track `count` and `fail` counters for batch jobs.
-   - Emit periodic progress rather than noisy per-file logs.
+   - Emit progress and track partial failures when the run is long enough to need them.
    - Preserve source timestamps or ownership only when useful and safe.
 
-6. Verify from the host.
-   - Count outputs and compare against expected inputs.
-   - Check total size and inspect a few sample outputs.
+5. Verify from the host.
+   - Compare the results with the expected outputs and inspect representative artifacts; use counts when the input/output relationship supports them.
    - Confirm permissions and ownership are usable by the host user.
-   - If the task uploaded or copied data externally, inspect the tool's final report and saved log.
 
 ## Pitfalls
 
 - Do not install packages on the host just because a command is missing; first consider a disposable container.
 - Do not mount broad host paths read-write when the task only needs a specific input directory.
-- Do not assume a file extension is supported; test one representative file before the batch.
+- Do not assume a file extension is supported; confirm that the tool can process the actual input.
 - Do not treat a successful package install as proof the actual tool can process the input.
 - Do not leave secrets embedded in command history, generated scripts, skill files, or final reports.
 - Do not hide partial failures. Report converted/uploaded/processed counts and failed counts separately.
 
-## Verification
-
-- Runtime chosen: `podman` or `docker`.
-- Input count was measured before the run.
-- Output directory exists and contains the expected artifacts.
-- Sample outputs were inspected from the host.
-- Final report includes counts, failures, output path, and any logs.
-- No host package installation was performed unless the user explicitly requested it.
+Report the output path, verification results, and any partial failures.
 
 ## Examples
 
