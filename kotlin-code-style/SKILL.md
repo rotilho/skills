@@ -1,7 +1,7 @@
 ---
 name: "kotlin-code-style"
-version: "1.0.1"
-description: "Apply Kotlin-specific code style and design guidance for Kotlin implementation and review: feature-owned file and type organization, helper and extension placement, constructors, validation shape, nullability, serialization, multiplatform expect/actual source sets, coroutines, Flow, mutable state ownership, and Kotlin unit/integration test style outside Cucumber or BDD. Use when writing or changing Kotlin code unless Spring application architecture or Cucumber/BDD is the main concern. When this skill loads, also load `code-practice` as the shared engineering base layer."
+version: "1.0.3"
+description: "Apply Kotlin-specific code style and design guidance for Kotlin implementation and review: feature-owned file and type organization, helper and extension placement, constructors, validation shape, nullability, serialization, multiplatform expect/actual source sets, coroutines, Flow, mutable state ownership, Kotlin unit/integration test style, and Gradle formatting or focused verification outside Cucumber or BDD. Use when writing, formatting, testing, or changing Kotlin code unless Spring application architecture or Cucumber/BDD is the main concern. When this skill loads, also load `code-practice` as the shared engineering base layer."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -28,19 +28,9 @@ Trigger for work like:
 - coroutine and Flow usage
 - Kotlin file and type organization
 - Kotlin unit or integration test style outside Cucumber / BDD
+- Kotlin formatting or focused Gradle verification
 
 Do not use this skill when the request is mainly about framework-neutral engineering defaults, Spring application structure, Spring-managed coroutine or Flow behavior, or Cucumber / BDD test structure.
-
-## Core promise
-
-Produce Kotlin guidance or edits that:
-- feel idiomatic without being clever
-- keep Kotlin features visible and intentional
-- use nullability, coroutines, and serialization deliberately
-- keep helper placement and ownership easy to follow
-- keep helpers, extensions, models, and coroutine owners near the behavior they support
-- keep platform differences in source-set structure instead of runtime branches when Kotlin Multiplatform supports it
-- make validation detail available when callers need to explain or recover from invalid input
 
 ## Hard constraints
 
@@ -88,7 +78,6 @@ Prefer these defaults unless local code shows a better house style:
 - coroutine scopes, channels, mutexes, and background jobs owned by the lifecycle or workflow that starts and stops them
 - make `Mutex`, coroutine scope, channel, and `Flow` collection ownership explicit in the owning type; do not hide it in a helper with no lifecycle
 - mutable collections and `MutableStateFlow` hidden behind the narrow Kotlin type that owns their invariants
-- local event-fed caches owned by the Kotlin type that makes the synchronous decision; extract shared state only after repetition is real
 - sparse comments focused on the why
 
 ### Step 3 - Apply the right Kotlin mode
@@ -127,23 +116,9 @@ Push back on:
 - `Mutex` or `MutableStateFlow` ownership that cannot be traced to one workflow or lifecycle
 - mutable maps, mutable lists, or `MutableStateFlow` exposed outside their owner
 
-### Step 4a - Kotlin examples for event-owned state
+### Step 4a - Keep Flow collection with its lifecycle owner
 
-Prefer small local caches when a component needs synchronous validation from events:
-
-```kotlin
-private val blockedCustomers = ConcurrentHashMap.newKeySet<CustomerId>()
-
-@EventListener
-fun onCustomerBlocked(event: CustomerBlocked) {
-    blockedCustomers += event.customerId
-}
-
-fun canPlaceOrder(customerId: CustomerId): Boolean =
-    customerId !in blockedCustomers
-```
-
-Keep execution-safety Flow collection inside the lifecycle owner rather than routing through an app event when directness matters:
+Collect state in the lifecycle scope that owns the work:
 
 ```kotlin
 fun start(scope: CoroutineScope) {
@@ -158,6 +133,7 @@ fun start(scope: CoroutineScope) {
 ### Step 5 - Keep overlap boundaries clear
 
 If the issue is:
+- direct calls, events, projections, or ownership across components: use `component-collaboration-architecture`
 - generic naming, architecture, or testing defaults: use `code-practice`
 - Kotlin Cucumber, feature files, step definitions, or BDD glue design: use `kotlin-cucumber-tests`
 - Spring controllers, configuration, transactions, or integration testing: use `spring-application-code-style`
@@ -171,6 +147,15 @@ Prefer behavior-named tests that cover:
 - boundary examples for minimum, maximum, empty, malformed, or platform-specific values
 
 Use lower-level Kotlin tests for dense rule matrices, serializers, validators, and value types. Use broader integration or workflow tests only when the behavior depends on real wiring, external contracts, or coroutine scheduling.
+
+### Step 7 - Format and verify Kotlin changes
+
+When Kotlin code or tests change:
+- inspect the repository's build tasks and local verification conventions first
+- when the repository uses ktlint and exposes `ktlintFormat`, run it to apply formatting; `ktlintCheck` reports violations but does not replace the formatting step
+- when the default Gradle home is not writable, use an existing writable Gradle home or set `GRADLE_USER_HOME` to a writable temporary directory
+- format before verification, then run the most focused relevant test task or test filter
+- expand to broader verification only when the change or repository contract requires it
 
 ## Canonical references
 
@@ -188,6 +173,8 @@ Before finishing, confirm that you:
 - kept platform differences out of common runtime conditionals when source sets fit
 - used structured validation where callers need error detail
 - selected test level and case shape for the Kotlin behavior being changed
+- applied the repository's Kotlin formatter before running focused verification
+- used a writable Gradle home when the execution environment required one
 - preferred direct control flow over clever chaining where the branch was straightforward
 - avoided adding normalization or reshaping code unless correctness or the request justified it
 - separated application and library advice when it mattered

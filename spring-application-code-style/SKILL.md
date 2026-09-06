@@ -1,7 +1,7 @@
 ---
 name: "spring-application-code-style"
-version: "1.0.1"
-description: "Apply Spring Boot application-layer conventions for package structure, thin controllers, services, repositories, transactions, feature-owned configuration properties, bean wiring, semantic validation boundaries, events, async observable-state tests, observability, and integration testing. Use when the user wants Spring application structure or Spring application architecture and wiring guidance, including coroutine or Flow usage inside Spring-managed code, especially for WebFlux or coroutine-first services, not shared libraries or framework internals. When this skill loads, also load `code-practice` as the shared engineering base layer."
+version: "1.0.3"
+description: "Apply Spring Boot application-layer conventions for package structure, thin controllers, services, repositories, transactions, feature-owned configuration properties, bean wiring, semantic validation boundaries, events, async observable-state tests, observability, integration testing, and serial Spring AOT verification. Use when the user wants Spring application structure, architecture, wiring, or AOT-generated test workflow guidance, including coroutine or Flow usage inside Spring-managed code, especially for WebFlux or coroutine-first services, not shared libraries or framework internals. When this skill loads, also load `code-practice` as the shared engineering base layer."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -28,18 +28,9 @@ Trigger for work like:
 - WebFlux or coroutine-first Spring structure
 - `@ConfigurationProperties` and bean wiring
 - Spring transactions, events, scheduling, or integration tests
+- Spring AOT-generated test tasks or generated-output collisions
 
 Do not use this skill for plain Kotlin style or language-agnostic coding guidance when the question is not tied to Spring-managed boundaries.
-
-## Core promise
-
-Produce Spring application guidance or edits that:
-- keep HTTP and framework edges thin
-- keep business sequencing out of controllers
-- use Spring for lifecycle and infrastructure concerns
-- keep Spring annotations and framework abstractions at real application boundaries
-- keep feature-owned configuration close to the feature that consumes it
-- treat async Spring event delivery as real behavior that must be proved through observable downstream state
 
 ## Hard constraints
 
@@ -47,6 +38,7 @@ Produce Spring application guidance or edits that:
 - load and use `code-practice` for framework-neutral defaults
 - use `kotlin-code-style` for pure Kotlin concerns unless they are directly tied to Spring usage
 - do not infer unsupported house rules such as mandatory Bean Validation, global exception advice, or slice-test defaults unless the local codebase shows them
+- do not overlap independent Gradle invocations that write to the same Spring AOT generated output, such as concurrent invocations of `processTestAot`
 
 ## Workflow
 
@@ -68,11 +60,10 @@ Classify the request around one or more of:
 Prefer these defaults unless local evidence says otherwise:
 - organize by feature or workflow first, not by technical layer
 - keep root application packages for bootstrap, composition, entrypoints, and shared public API only
-- keep controllers and listeners focused on protocol or framework translation
+- keep controllers focused on protocol and framework translation
 - keep business sequencing in the owning feature package
 - use `@EventListener` in a behavior owner when it owns the resulting state change, side effect, projection, or lifecycle transition; avoid listener classes that only forward
 - keep repositories behind the owning service or workflow; event listeners and other services should call that owner instead of reaching into another feature's repository directly
-- use Spring events to keep lower-level source-of-truth services from depending on downstream cleanup, projection, notification, or feedback concerns
 - keep repositories and persistence adapters near the feature they persist unless persistence is shared infrastructure
 - keep configuration feature-owned when it wires one feature
 - use root or shared configuration only for app bootstrap, external clients, infrastructure factories, lifecycle scopes, or cross-feature composition
@@ -127,16 +118,6 @@ class InventoryReservations(private val events: DomainEvents) {
 }
 ```
 
-Avoid pass-through listener classes:
-
-```kotlin
-@Component
-class OrderListener(private val service: OrderService) {
-    @EventListener
-    fun onOrderPlaced(event: OrderPlaced) = service.reserveInventory(event)
-}
-```
-
 For async event flows, test the externally visible result instead of the listener method:
 
 ```kotlin
@@ -178,6 +159,7 @@ Before finishing, confirm that you:
 - kept configuration feature-owned unless it is shared infrastructure
 - treated event listeners as owners of side effects or state transitions, not forwarding glue
 - tested async event behavior through downstream observable state
+- prevented overlapping Gradle invocations from writing the same Spring AOT output
 - separated semantic validation from protocol/framework validation
 - avoided inventing unsupported framework house rules
 - did not drift into generic or Kotlin-only guidance

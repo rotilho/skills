@@ -1,7 +1,7 @@
 ---
 name: "code-practice"
-version: "1.0.1"
-description: "Improve or apply language-agnostic, framework-neutral code practices for clean code, maintainability, refactoring, naming, readability, behavior ownership, evidence-backed diagnosis, trust boundaries, compatibility, state, error handling, testing, and reusable engineering defaults. Use when the user wants broad code quality guidance rather than Kotlin-, Spring-, or framework-specific conventions."
+version: "1.0.7"
+description: "Improve or apply language-agnostic, framework-neutral code practices for clean code, maintainability, refactoring, naming, readability, behavior ownership, evidence-backed diagnosis, trust boundaries, compatibility, state, concurrent collections, compound invariants, locking strategy, error handling, testing, Given/When/Then test structure, and reusable engineering defaults. Use when the user wants broad code quality guidance rather than Kotlin-, Spring-, or framework-specific conventions."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -21,28 +21,12 @@ Trigger for work like:
 - general code style or coding conventions
 - naming, function shape, duplication, or complexity reduction
 - API shape, module boundaries, and responsibility splits
-- state, mutation, concurrency, error handling, or testability concerns
+- shared state, mutation, concurrent collections, locking strategy, compound invariants, error handling, or testability concerns
+- test readability or Given/When/Then structure in code-based tests
 - code review focused on reusable engineering defaults rather than language or framework rules
 - application vs library tradeoffs without language-specific rules
 
 Do not use this skill when the main question is about component collaboration shape, Kotlin idioms, Spring architecture, Cucumber / BDD structure, or any framework-managed pattern.
-
-## Core promise
-
-Produce guidance or edits that:
-- keep behavior explicit
-- keep ownership clear
-- place new code at the smallest behavior owner from the first edit
-- organize around behavior ownership before technical-layer symmetry
-- keep mutation narrow
-- make boundaries visible
-- keep tradeoffs visible
-- avoid abstraction without payoff
-- diagnose from direct evidence before changing code
-- keep public surfaces small and compatibility-preserving unless the user asks for a breaking change
-- make trust boundaries explicit and locally verify external outputs before accepting them
-- prevent blob files, dumping-ground modules, and generic layers before they appear
-- place code files by feature or workflow ownership from the first edit
 
 ## Hard constraints
 
@@ -89,6 +73,7 @@ Before prescribing changes, identify what already exists:
 - whether a proposed file, module, or package would become a mixed-concern bucket
 - whether a new abstraction owns a real decision or only forwards calls
 - where errors are created, translated, logged, or retried
+- which production caller, lifecycle, input, or dependency can actually trigger each proposed failure path
 - whether tests cover the defect or contract at the same level where it failed
 
 Keep the diagnosis gap-first: strengthen the weakest high-impact area first instead of rewriting everything.
@@ -106,10 +91,11 @@ Prefer these defaults unless local evidence strongly disagrees:
 - keep public APIs small and explicit
 - preserve public contracts by default; when changing one, add migration, adapter, or compatibility coverage unless a breaking change is intentional
 - keep functions small enough to hold in one pass; split when a unit mixes multiple decisions or needs section comments to stay readable
+- keep an operation and the state transition that must always follow it in one cohesive method; split them only when either has a valid independent use or the separation exposes a real policy boundary
+- keep a repeated compound state transition together at the smallest shared scope; extract a helper when it makes the invariant clearer
 - prefer flat control flow; handle exceptional branches early when that makes the main path clearer
 - keep parameter lists short; group cohesive data, but do not hide unrelated inputs in grab-bag objects
 - keep each unit responsible for one kind of decision
-- keep primitive or source-of-truth domains independent from downstream reaction concerns; publish facts instead of importing higher-level cleanup, projection, notification, or feedback dependencies
 - keep integration concerns at the edges
 - keep mutable state local to the workflow that mutates it
 - guard shared mutable state explicitly, close to its owner, and make the guard visible in tests when concurrency matters
@@ -126,8 +112,33 @@ Prefer these defaults unless local evidence strongly disagrees:
 - normalize external input at the boundary that accepts it; do not normalize domain values in the middle of behavior owners
 - test behavior and boundaries, not only construction
 - test at the same level as the defect or contract: unit for local rules, integration for boundary wiring, end-to-end for workflow behavior
+- structure every new or changed code-based test with explicit Given, When, and Then sections, using the host language's ordinary comment syntax; do not rewrite untouched tests solely to add the markers
 - avoid proof-by-build when a focused test or assertion can prove the changed contract directly
 - make tests readable enough to explain the scenario, action, and expected outcome without extra narration
+
+### Step 3a - Protect compound state as one invariant
+
+Before choosing a lock, mutex, actor, or concurrent container:
+- define the whole invariant and every collection, nested mutable value, counter, limit, and check-and-act transition it couples
+- rely on concurrent collections alone only when correctness consists of independent per-entry atomic operations
+- use one invariant-owned guard for transitions spanning collections, nested mutable values, counters, or check-and-act limits
+- prefer plain collections when every access shares that guard; combining a concurrent collection with a broad lock needs a documented independent access path that benefits from per-entry concurrency
+- name the guard for the state or invariant it owns, and comment its complete ownership when the boundary is not obvious
+- decide and mutate under the guard; move avoidable logging, events, callbacks, and I/O outside it only when required ordering and failure behavior are preserved
+- preserve required fairness and reentrancy behavior when changing concurrency mechanisms
+- test the relevant invariant under contention and propagate worker failures to the test
+
+### Step 3b - Require evidence before defensive behavior
+
+Before adding a retry, fallback, guard, recovery branch, or failure test:
+- identify the exact production caller, input, dependency, scheduler, or lifecycle event that can trigger it
+- establish reachability from production callers or the boundary and lifecycle contract; a test-created state alone does not justify new recovery behavior
+- distinguish untrusted boundaries from closed-world internals; validate public, persisted, serialized, remote, and user-controlled values, but trust internal values whose owners already enforce the invariant
+- check whether an existing owner already provides recovery through restart, expiration, reconciliation, idempotency, or rediscovery
+- weigh the actual consequence and frequency against the permanent branch, state, API, and test complexity
+- do not let a test manufacture an otherwise unreachable failure and then use that test as the reason production code must handle it
+
+If the trigger cannot be named or demonstrated, omit the behavior. Record the assumption only when it is important and inexpensive to revisit.
 
 ### Step 4 - Apply the right mode
 
@@ -166,56 +177,17 @@ Push back on:
 - boolean flags or mode parameters when separate entry points would make the caller clearer
 - deep nesting when guard clauses, extraction, or data reshaping would flatten the flow
 - duplicated branches that should share one policy, while avoiding abstraction over coincidence
-- service layers that only forward calls
-- proxy methods added only to preserve layering symmetry
 - methods that only forward arguments and return the same result without owning a decision, invariant, translation, or meaningful deduplication
 - utility buckets with mixed concerns
 - local normalization or reshaping logic for simple inputs unless correctness, an external contract, or the request requires it
 - abstractions added only for symmetry, testing ceremony, or speculative reuse
+- method pairs such as `run()` then `record()` when every caller must invoke both and neither has a valid independent lifecycle
 - shared mutable state without a clear owner
 - state mutated in one workflow but guarded, refreshed, or invalidated by unrelated callers
 - accepting generated, serialized, remote, or user-provided data without a boundary check when the next step relies on it
 - error handling that mixes recovery, translation, and logging in every layer
 - wide interfaces that bundle unrelated capabilities
 - tests that only prove the project builds while the failing behavior or public contract remains untested
-
-### Step 6a - Apply event-owned refactoring when current code is coupled
-
-When refactoring event- or command-heavy application code, prefer these moves:
-
-- find the owner from the state transition or side effect, not from the current caller
-- delete forwarding layers instead of renaming or polishing them
-- publish facts that real consumers need; avoid micro-events for internal steps
-- use facts to break dependency cycles when a downstream behavior needs to react to a lower-level state transition
-- let consumers keep local event-fed caches for synchronous decisions
-- keep execution-safety side effects close to the execution boundary
-- replace registries with facts when one validator is the real consumer
-- make expected rejection a domain outcome, not an exception caught by a generic wrapper
-
-If the main decision is whether components should use direct calls, orchestration, events, projections, observers, or local state ownership, use `component-collaboration-architecture` instead of stretching this base skill.
-
-Examples:
-
-```kotlin
-// Bad: forwarding layer owns no decision.
-fun onRefund(command: RefundOrder) = billing.refund(command.orderId)
-
-// Better: real owner consumes the fact/command and publishes a domain fact.
-fun onRefund(command: RefundOrder) {
-    refunds[command.orderId] = RefundStatus.APPROVED
-    publish(OrderRefunded(command.orderId))
-}
-```
-
-```kotlin
-// Bad: shared registry only feeds one validator.
-validator.validate(order, customerRegistry.customers())
-
-// Better: validator keeps the local cache it needs.
-fun onCustomerBlocked(event: CustomerBlocked) {
-    blockedCustomers += event.customerId
-}
-```
 
 ### Step 7 - Explain tradeoffs briefly
 
@@ -247,7 +219,10 @@ Before finishing, confirm that you:
 - made ownership and boundaries clearer
 - improved change safety, state boundaries, or error handling where relevant
 - diagnosed with direct evidence before fixing when the request was a defect or operational issue
+- tied every new retry, fallback, guard, and failure test to a reachable production trigger or external trust boundary
 - kept public surface and compatibility impact explicit
 - tested at the level of the changed behavior or contract
+- kept new or changed code-based tests visibly separated into Given, When, and Then sections
+- protected compound state at the invariant boundary and kept avoidable side effects outside its guard
 - avoided speculative abstraction
 - did not duplicate Kotlin or Spring-specific guidance

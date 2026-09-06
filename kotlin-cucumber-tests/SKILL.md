@@ -1,6 +1,6 @@
 ---
 name: "kotlin-cucumber-tests"
-version: "1.0.1"
+version: "1.0.2"
 description: "Plan, review, or improve Kotlin Cucumber / BDD tests: decide when Cucumber fits workflow behavior, when lower-level tests fit dense rules, and how to structure feature files, step definitions, hooks, fixtures, async outcome polling, and Kotlin helpers without coupling steps to protocol or implementation details. Use when the request explicitly centers on Kotlin Cucumber, Kotlin BDD, feature files, step definitions, hooks, or executable-specification tests and reviews."
 license: "MIT"
 compatibility: "opencode"
@@ -23,16 +23,6 @@ Trigger for work like:
 - fix Kotlin-specific Cucumber glue design
 
 Do not use this skill for generic unit tests, framework-neutral test advice, broad Kotlin style work without Cucumber, or Spring test architecture that is not specifically about Cucumber glue and scenarios.
-
-## Core promise
-
-Produce Cucumber guidance or edits that:
-- keep scenarios readable to non-implementers
-- keep step definitions thin and behavior-focused
-- keep Cucumber at workflow and acceptance-behavior level
-- keep shared state scenario-scoped and explicit
-- use Kotlin-specific structure only where it improves the test code
-- keep overlap boundaries with unit and lower-level integration tests clear
 
 ## Hard constraints
 
@@ -83,7 +73,7 @@ Push back on:
 ### Step 3 - Design step definitions as glue, not as the test body
 
 Prefer these defaults:
-- map each step to a thin Kotlin step definition that delegates to helpers, drivers, or domain-specific test services
+- keep each Kotlin step definition short and focused; extract helpers or drivers for repeated setup, protocol mechanics, or substantial logic
 - group step-definition files by domain concept or workflow area
 - reuse steps when the phrasing represents the same behavior, but do not over-parameterize unrelated actions into one vague mega-step
 - use data tables or doc strings when they make the example clearer than many scalar parameters
@@ -117,7 +107,7 @@ Then InventoryReservations contains SKU "mug"
 In Kotlin step code:
 - prefer small constructor-injected collaborators or focused helper objects when using DI
 - keep scenario state in small explicit context objects rather than scattered mutable vars
-- use package-local helper functions or focused support types for repeated setup and assertions
+- keep helper functions or focused support types near the steps that share setup and assertions
 - prefer clear block bodies over clever chaining when a step performs several actions
 - use Kotlin collections, nullability, and data classes to make fixtures explicit and safe
 - keep backticked function names only when they help readability more than standard names
@@ -141,31 +131,6 @@ Avoid:
 - cross-scenario caches or globals
 - hooks that silently mutate too much test state
 - giant fixture objects passed everywhere when a smaller scenario context would do
-
-### Step 6 - Guard common failure modes
-
-Watch for:
-- ambiguous or overlapping step expressions
-- brittle step wording tied to implementation details
-- too many parameters in one step instead of a table or helper abstraction
-- duplicated step text with slightly different regexes
-- leaked state between scenarios
-- slow suites caused by pushing too many narrow cases into Cucumber instead of lower-level tests
-- flaky async assertions that check internal timing or listener calls instead of waiting for observable outcomes
-- Kotlin hook mistakes around companion objects, named objects, or static expectations
-
-### Step 7 - Explain boundaries briefly
-
-When giving advice, separate:
-- generic BDD guidance
-- Kotlin/Cucumber-JVM specifics
-- framework-specific advice only if the user's stack requires it
-
-If you recommend moving a test, say why:
-- Cucumber for business-facing workflows and acceptance contracts
-- integration tests for boundary wiring and infrastructure behavior
-- unit tests for local logic and dense edge cases
-- serializer, parser, and validator tests for round-trip, malformed-input, and boundary matrices
 
 ## Canonical references
 
