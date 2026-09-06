@@ -1,6 +1,6 @@
 ---
 name: "local-kanban-board"
-version: "1.0.0"
+version: "1.0.1"
 description: "Create, resume, and maintain a repository-local Kanban board stored as readable Markdown under `kanban/`. Use when the user wants local task tracking, a resumable board, task prefixes, task dependencies, board scripts, templates, archives, or agent-readable project work state without relying on external project tools."
 license: "MIT"
 compatibility: "opencode"
@@ -78,7 +78,8 @@ Do not use when:
 
 - Treat `kanban/tasks/*.md` and `kanban/archive/**/*.md` as the source of truth.
 - Keep `kanban/BOARD.md` tracked as a generated human-readable snapshot.
-- Mutate tasks through `kanban/scripts/kanban` unless repairing malformed metadata.
+- Change metadata and append notes through `kanban/scripts/kanban`; edit descriptions, plans, and acceptance criteria directly in task bodies, preserving metadata and history.
+- Serialize board mutations when multiple agents share the repo; the CLI does not lock task IDs or generated board writes.
 - Store active tasks in `kanban/tasks/`; store archived tasks under `kanban/archive/YYYY/`.
 - Keep task metadata flat: `id`, `title`, `status`, `priority`, `type`, `assignee`, `depends_on`, `created`, `updated`, `archived`.
 - Generate IDs by scanning active and archived tasks for the configured prefix; do not use a separate counter file.
