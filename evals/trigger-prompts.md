@@ -16,7 +16,6 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Class A calls five collaborators today. Should it keep direct calls or publish one event and let each owner react?" | `component-collaboration-architecture` | Collaboration shape and ownership decision. |
 | "This listener just forwards events to another service. Refactor the flow so behavior and state ownership are clearer." | `component-collaboration-architecture` | Proxy/listener removal across components. |
 | "AccountService owns the account state change, but it now imports vote cleanup to mark old votes stale. Break the dependency so the source-of-truth update can notify the downstream cleanup owner." | `component-collaboration-architecture` | Source-of-truth to downstream cleanup boundary should be a collaboration-shape decision. |
-| "Rewrite this update in concise mode but keep the warning clear." | `concise` | Communication style and brevity. |
 | "Create a new skill for release-note generation and include trigger eval prompts plus a realistic behavior simulation." | `create-skill` | Skill authoring, trigger evaluation, and behavior simulation. |
 | "Research current options for hosted vector databases and recommend one with sources." | `deep-research` | Multi-source evidence-backed research. |
 | "Create a DESIGN.md from these screenshots, Tailwind config, and brand notes; count which references support each section and flag inconsistencies." | `design-extractor` | DESIGN.md extraction with evidence counts and conflicts. |
@@ -60,7 +59,7 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Explain how to declare a Spring `@EventListener` method for an existing event." | `component-collaboration-architecture` | `spring-application-code-style` |
 | "Fix this Spring-free coroutine mutex race in a plain Kotlin library." | `spring-application-code-style` | `kotlin-code-style` |
 | "Format this plain Kotlin module and run one focused unit test." | `spring-application-code-style` | `kotlin-code-style` |
-| "Summarize this provided note more briefly." | `deep-research` | `concise` |
+| "Summarize this provided note more briefly." | `deep-research` | Normal prose editing; follow AGENTS.md writing guidance. |
 | "Make this dashboard visually cleaner without producing a DESIGN.md." | `design-extractor` | Frontend design or implementation guidance |
 | "Add this CLI to the project Dockerfile so CI can use it." | `ephemeral-container-workbench` | Project container/toolchain maintenance |
 | "Use my current Chrome tab and logged-in cookies to inspect this dashboard." | `playwright-screenshots` | Browser bridge or exported auth state |

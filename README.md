@@ -29,7 +29,6 @@ User-owned active skills:
 | `auto-skill-capture` | Capturing a reusable procedural gap revealed by work, corrections, diagnosis, or environment setup. | The lesson is already covered, routine, private, temporary, or only a task outcome. |
 | `code-practice` | Framework-neutral code quality, behavior ownership, evidence-first debugging, trust boundaries, state ownership, compatibility, tests, refactoring. | Kotlin, Spring, or Cucumber-specific rules dominate. |
 | `component-collaboration-architecture` | Choosing direct calls, orchestration, domain events, observers, projections, state ownership, proxy removal, and source-of-truth to downstream dependency boundaries. | The task is only local cleanup, language idioms, framework wiring, or test glue. |
-| `concise` | Default concise communication, brief updates, tighter rewrites. | User asks for fuller, warmer, formal, legal, or safety-sensitive detail. |
 | `create-skill` | Creating, rewriting, or evaluating agent skills, trigger boundaries, and realistic behavior simulations. | The task is ordinary docs/code work rather than reusable skill behavior. |
 | `deep-research` | Evidence-backed research, comparisons, audits, and gap-first source validation. | Routine local code or prompt review with no research need. |
 | `design-extractor` | Create or audit `DESIGN.md` from screenshots, Figma, CSS, tokens, brand notes, or app references, including evidence counts and conflicts. | Ordinary frontend implementation when no durable `DESIGN.md` or design extraction is requested. |

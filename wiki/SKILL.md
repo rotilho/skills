@@ -1,6 +1,6 @@
 ---
 name: "wiki"
-version: "1.1.0"
+version: "1.1.1"
 description: "Organize a local wiki or repo knowledge base: decide where durable knowledge belongs, update or merge existing pages, create distinct pages when needed, and maintain useful names, links, sources, and freshness context. Use for knowledge organization, not temporary notes or prose polishing."
 license: "MIT"
 compatibility: "opencode"
@@ -17,7 +17,7 @@ Keep durable knowledge easy to find, verify, and update. Prefer one clear home f
 
 Use when organizing docs or a knowledge base, deciding where new knowledge belongs, merging overlapping pages, or improving their scope and discoverability.
 
-Use `deep-research` for gathering evidence, `create-skill` for agent procedures, and `concise` for prose-only edits. Raw research and temporary progress are not durable wiki pages.
+Use `deep-research` for gathering evidence and `create-skill` for agent procedures. Handle prose-only edits directly, following AGENTS.md writing guidance. Raw research and temporary progress are not durable wiki pages.
 
 ## Workflow
 
