@@ -1,7 +1,7 @@
 ---
 name: "wiki"
-version: "1.1.1"
-description: "Organize a local wiki or repo knowledge base: decide where durable knowledge belongs, update or merge existing pages, create distinct pages when needed, and maintain useful names, links, sources, and freshness context. Use for knowledge organization, not temporary notes or prose polishing."
+version: "1.2.0"
+description: "Organize durable repo knowledge: place, update, or merge wiki pages and maintain their links. Use for knowledge organization, not scratch notes or prose-only edits."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -25,7 +25,7 @@ Use `deep-research` for gathering evidence and `create-skill` for agent procedur
 
 Inspect the repo's wiki/docs area, nearby pages, indexes, decision logs, and relevant source material. Separate durable reference, changing status, and temporary working notes.
 
-Use the established location or one the user named. Keep drafts and run-specific artifacts in `.workbench/wiki/`. If the durable location is missing or ambiguous, prepare the content in scratch and clarify the destination before publishing it into the repo.
+Use the established location or one the user named. When creating a wiki is authorized and no location exists, choose a conventional repo location and state the choice. Clarify only when unresolved alternatives materially affect ownership, visibility, or the requested result; prepare the content in scratch while that decision is pending. Keep drafts and run-specific artifacts in `.workbench/wiki/`.
 
 ### 2. Choose the smallest useful change
 

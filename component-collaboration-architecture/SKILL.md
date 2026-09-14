@@ -1,7 +1,7 @@
 ---
 name: "component-collaboration-architecture"
-version: "1.1.1"
-description: "Design or refactor how components, classes, modules, or services collaborate by choosing direct calls, orchestration, domain events, observers, projections, shared state, or local ownership. Use when a class calls many collaborators, source-of-truth or primitive domains depend on downstream cleanup/projection/notification work, handlers/listeners/proxies only forward, ownership of behavior/data/state is unclear, a dependency cycle appears, stale projection/cache cleanup crosses domains, or the user asks whether to emit an event and consume it in N places. Avoid for ordinary cleanup, Kotlin idioms, Spring wiring, or Cucumber structure unless collaboration boundaries are the main issue."
+version: "1.2.0"
+description: "Design or refactor component collaboration and state ownership. Use for direct calls versus events, forwarding chains, dependency cycles, projections, or cross-component invariants; skip ordinary style and framework wiring."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -11,307 +11,45 @@ metadata:
 
 # Component Collaboration Architecture
 
-Use this skill to decide how application parts should talk to each other and where behavior, data, state, and side effects should live.
+Decide how the affected components should collaborate and where their behavior, data, and failure responsibility belong. Scope analysis and changes to the requested boundary; an architecture question can end with a reasoned recommendation without refactoring code.
 
-## When to use
+Use `code-practice` for local readability and abstraction quality, and Kotlin, Spring, or Cucumber skills for their language or framework mechanics. Resolve the collaboration decision here, then continue the authorized task with any relevant specialist guidance.
 
-Trigger for work like:
-- deciding whether one class should call several collaborators directly
-- deciding whether to emit one event and let multiple consumers react
-- removing proxy, listener, handler, manager, or service chains that only forward
-- finding who owns state, validation, lifecycle, retries, side effects, or recovery
-- replacing shared registries, broad mutable state, or god coordinators with clearer owners
-- designing local projections, read models, event-fed caches, or explicit query boundaries
-- reviewing event-heavy, command-heavy, observer-heavy, or callback-heavy code for ownership
-- breaking dependency cycles where a primitive/source-of-truth domain is reaching into downstream cleanup, projection, notification, or cache maintenance
-- deciding whether a state transition should publish a domain fact for downstream owners to consume
+## Identify owners and requirements
 
-Do not use this skill for ordinary naming, small-function cleanup, Kotlin idioms, Spring wiring, or Cucumber structure unless the main issue is collaboration shape or ownership boundaries.
+Trace the initiating request, timer, message, or input through the affected workflow. Identify who can accept or reject the action, who holds the deciding state, who protects its invariant, and who owns side effects and recovery. The current caller is not necessarily the owner.
 
-## Hard constraints
+For links that matter to the decision, establish whether they request work, query current state, or report a completed fact. Check the need for an immediate result, sequencing, transaction coupling, independent reactions, and freshness. Include downstream consumers only as far as these requirements or the proposed change affect them.
 
-- Pick owners from invariants, state transitions, side effects, and failure responsibility, not from the current caller.
-- Keep required synchronous validation, sequencing, return values, and transaction-coupled work as direct calls.
-- Do not use events as disguised commands. If something is being requested, model it as a command, method call, job, or workflow step.
-- Prefer factual event names such as `PrimaryDocumentChanged`; avoid command-shaped event names such as `CleanSearchIndexRequested`.
-- Keep mutable state local to one writer. Other components can keep projections or caches fed by owner-published facts.
-- Keep proxies only when they own translation, protocol adaptation, authorization, retry, lifecycle, observability, or real deduplication.
-- Delete pass-through layers that exist only for symmetry or because "everything needs a handler."
-- Treat expected rejection as a domain result, not as an exception hidden behind a generic wrapper.
-- Treat recovery, resync, and external-state adoption as explicit behavior, not as normal request handling.
+For affected data, make the source of truth, writer, readers, projection owners, and contract boundary clear. Keep mutation with one owner; multiple writers need an explicit coordination protocol. Define rebuild or reconciliation behavior when derived state or recovery is part of the task.
 
-## Workflow
+## Choose the collaboration shape
 
-### Step 1 - Map the current collaboration
+| Shape | Use when |
+| --- | --- |
+| Direct call | Validation, sequencing, return values, failure propagation, or transaction-coupled work must stay synchronous; the callee is a required participant. |
+| Orchestrator | Several participants are required, no participant owns the whole process, and the workflow owns real ordering, progress, compensation, or retry state. |
+| Event or observer reaction | An owner has completed a fact, consumers can react independently, and the consistency and failure contract permits the chosen delivery model. The publisher should not need to know each consumer. |
+| Projection or event-fed cache | A downstream owner needs local reads of another owner's facts, can tolerate the resulting staleness, and has a suitable rebuild/update contract. |
+| Query | A component needs current information from its owner without requesting mutation; stale derived state would be unsafe or misleading. |
+| Adapter | A protocol, transport, storage, vendor, process, or authorization boundary needs translation or normalization. |
 
-Before changing code, identify:
-- the initiating actor, request, timer, message, or external input
-- the component that can accept or reject the action
-- the component that owns each affected state change
-- every downstream side effect
-- whether any source-of-truth owner currently imports downstream cleanup, projection, notification, indexing, or cache-maintenance code
-- every consumer that needs to know about the outcome
-- whether each consumer needs ordering, a return value, retry, idempotency, or transaction coupling
-- which classes only forward calls, events, or DTOs
+Keep requests as commands, calls, jobs, or workflow steps. Events describe completed facts such as `PrimaryDocumentChanged`; a name such as `CleanSearchIndexRequested` disguises a command. Do not split required synchronous work into events just because several collaborators are involved.
 
-Classify each link as:
-- direct call
-- query
-- command or request
-- domain fact or event
-- observer callback
-- projection or read model update
-- external adapter call
-- recovery or reconciliation flow
+## Change only collaboration that causes the problem
 
-### Step 2 - Find the real owner
+- Collapse pass-through listener, handler, or proxy chains when they own no translation, protocol adaptation, authorization, retry, lifecycle, observability, or meaningful deduplication.
+- Move decisions and state out of generic coordinators or registries into their behavior owner. Keep an orchestrator when the workflow itself has an independent responsibility.
+- Replace micro-events for internal steps with private calls, and event-as-command flows with explicit requested work.
+- When a source-of-truth owner depends on independent downstream cleanup, indexing, notification, or cache maintenance, consider completed-fact publication with a behavior-owned consumer. Apply the consistency and failure criteria above first; required synchronous or transaction-coupled work stays direct.
+- Name remaining abstractions by their owned decision, state, or side effect. Do not introduce eventing or indirection merely for style.
 
-Ask these questions:
-- Who can say no?
-- Who has the state needed to decide?
-- Who must keep the invariant true?
-- Who owns the external side effect or irreversible operation?
-- Who pays the cost when this fails halfway?
-- Who needs to recover, retry, deduplicate, or reconcile?
+Read [the examples](references/examples.md) only when a concrete comparison would help: required fan-out, independent downstream cleanup, pass-through listeners, or a validator-local cache. The sketches do not replace the real workflow's transaction and failure requirements.
 
-The owner is usually the component that changes durable state, protects the invariant, or owns the side effect. It is not necessarily the component that currently receives the call.
+## Preserve failure behavior and verify the result
 
-### Step 3 - Choose the collaboration shape
+For changed collaboration, assess the failures its actual contract allows: duplicates, reordering, partial completion, retries, and stale state. Preserve or define needed idempotency, transaction boundaries, compensation, abort, reconciliation, and observability. Expected rejection is a domain result; recovery, resync, and external-state adoption are explicit behaviors. Added eventing must make the failure model clear.
 
-Use direct calls when:
-- the caller needs an immediate answer
-- the operation is one synchronous workflow
-- failure must stop the current operation
-- the callee is a required collaborator, not an optional reaction
-- the coupling is part of the domain or transaction
+When implementing a behavior change, select tests that prove the affected ownership and consistency contract: rejection before side effects, required synchronous work, publication after the fact is true, an independent consumer's reaction, or projection updates/rebuilds. Exercise duplicate, stale, and recovery paths when reachable and relevant. Do not expand a review-only task into implementation or add tests for unrelated mechanisms.
 
-Use an orchestrator when:
-- the workflow itself owns ordering, progress, compensation, or retry
-- several participants are required but none owns the whole process
-- the orchestration state is real and observable
-
-Use events when:
-- a component has completed something factual
-- multiple consumers can react independently
-- the publisher should not know every consumer
-- consumers can tolerate eventual consistency
-- adding a consumer should not change the publisher
-
-Use projections or local event-fed caches when:
-- a component needs fast local reads for its own decision
-- the source of truth is owned elsewhere
-- a downstream owner needs to react to an upstream fact without making the upstream owner know that downstream concern
-- rebuilding from facts is acceptable or useful
-- direct shared reads would couple schemas or internals
-
-Use queries when:
-- a component needs current information from the owner
-- no state change is requested
-- staleness would be unsafe or misleading
-
-Use adapters when:
-- the code crosses a protocol, transport, storage, vendor, process, or authorization boundary
-- translation and normalization are the real responsibility
-
-### Step 4 - Remove false collaboration
-
-Push these refactors:
-- collapse listeners or handlers that only call another component
-- move behavior from a generic coordinator into the owner of the decision or state
-- split god classes by owned workflow or invariant
-- remove registries with no independent responsibility; keep state with its decision owner or query the source of truth when freshness matters
-- replace micro-events for internal steps with direct private methods
-- replace event-as-command flows with explicit commands, jobs, or workflow steps
-- replace source-of-truth to independent downstream dependencies with completed-fact publication plus a behavior-owned consumer
-- rename remaining abstractions by the decision, state, or side effect they own
-
-### Step 5 - Make data ownership explicit
-
-For each important data set, state:
-- source of truth
-- only writer
-- allowed readers
-- projection or cache owners
-- rebuild or reconciliation path
-- schema or contract boundary
-
-If several components write the same data, redesign until there is one writer or an explicit coordination protocol.
-
-### Step 6 - Guard failure and recovery
-
-For collaboration that crosses owners, check:
-- duplicate requests or events
-- out-of-order delivery
-- partial failure
-- retry behavior
-- idempotency keys or natural idempotency
-- transactional boundary
-- compensating action, pause, abort, or reconciliation
-- observability needed to debug the workflow
-
-Do not add eventing or indirection unless the failure model is clearer afterward.
-
-### Step 7 - Test the boundary, not the plumbing
-
-Prefer tests that show:
-- the owner accepts or rejects the action
-- required direct collaborators are called only after validation passes
-- events are published only after the fact is true
-- independent consumers react to facts without changing the publisher
-- projections can be rebuilt or updated from facts
-- duplicate, stale, rejected, and recovery paths are explicit
-
-## Examples
-
-### Direct fan-out vs event fan-out
-
-If class `A` calls five collaborators and those calls are required steps of one operation, keep the directness but rename and shape `A` as the workflow owner:
-
-```kotlin
-class CheckoutWorkflow(
-    private val payments: Payments,
-    private val inventory: Inventory,
-    private val orders: Orders,
-) {
-    fun checkout(cart: Cart): CheckoutResult {
-        val reservation = inventory.reserve(cart)
-        val charge = payments.charge(cart.total)
-        return orders.confirm(cart, reservation, charge)
-    }
-}
-```
-
-If the main owner only needs to record a fact and the other work is independent, publish the fact and let owners react:
-
-```kotlin
-class Orders(private val events: DomainEvents) {
-    fun markPaid(orderId: OrderId) {
-        paidOrders += orderId
-        events.publish(OrderPaid(orderId))
-    }
-}
-
-class ReceiptEmails {
-    fun onOrderPaid(event: OrderPaid) = sendReceipt(event.orderId)
-}
-```
-
-### Source-of-truth owner with downstream cleanup
-
-Avoid making the source-of-truth owner depend on downstream cleanup:
-
-```kotlin
-class ProfileService(
-    private val publicationPolicy: PublicationPolicy,
-    private val searchIndex: SearchIndex,
-) {
-    fun changePrimaryDocument(profile: Profile, nextDocumentId: DocumentId) {
-        publicationPolicy.requireAllowed(nextDocumentId)
-        val previousDocumentId = profile.primaryDocumentId
-        profile.primaryDocumentId = nextDocumentId
-        searchIndex.recordStale(previousDocumentId)
-    }
-}
-```
-
-Prefer a direct call for required validation, then publish a completed fact that the downstream owner consumes:
-
-```kotlin
-class ProfileService(
-    private val publicationPolicy: PublicationPolicy,
-    private val events: DomainEvents,
-) {
-    fun changePrimaryDocument(profile: Profile, nextDocumentId: DocumentId) {
-        publicationPolicy.requireAllowed(nextDocumentId)
-        val previousDocumentId = profile.primaryDocumentId
-        if (previousDocumentId == nextDocumentId) return
-
-        profile.primaryDocumentId = nextDocumentId
-        events.publish(PrimaryDocumentChanged(profile.id, previousDocumentId, nextDocumentId))
-    }
-}
-
-class SearchIndex {
-    private val staleDocuments = mutableSetOf<DocumentId>()
-
-    fun onPrimaryDocumentChanged(event: PrimaryDocumentChanged) {
-        staleDocuments += event.previousDocumentId
-    }
-}
-```
-
-### Pass-through listener
-
-Avoid listeners that only forward:
-
-```kotlin
-class OrderPlacedListener(private val inventory: InventoryService) {
-    fun onOrderPlaced(event: OrderPlaced) = inventory.reserve(event.orderId)
-}
-```
-
-Prefer the behavior owner consuming the fact:
-
-```kotlin
-class InventoryReservations(private val events: DomainEvents) {
-    fun onOrderPlaced(event: OrderPlaced) {
-        reserved += event.orderId
-        events.publish(InventoryReserved(event.orderId))
-    }
-}
-```
-
-### Shared registry used by one decision
-
-Avoid shared state that exists only to feed one validator:
-
-```kotlin
-fraudCheck.validate(order, customerRegistry.blockedCustomers())
-```
-
-Keep the state with the decision maker when event-fed updates and their freshness satisfy the decision's contract:
-
-```kotlin
-class FraudCheck {
-    private val blockedCustomers = mutableSetOf<CustomerId>()
-
-    fun onCustomerBlocked(event: CustomerBlocked) {
-        blockedCustomers += event.customerId
-    }
-
-    fun validate(order: Order): FraudDecision =
-        if (order.customerId in blockedCustomers) FraudDecision.Rejected else FraudDecision.Accepted
-}
-```
-
-## Overlap boundaries
-
-If the issue is:
-- local naming, readability, duplication, or generic abstraction quality: use `code-practice`
-- Kotlin file layout, nullability, Flow, coroutine ownership, or type design: use `kotlin-code-style`
-- Spring controller/service/repository wiring, transactions, bean config, or Spring events: use `spring-application-code-style`
-- Cucumber feature files, step definitions, hooks, or scenario state: use `kotlin-cucumber-tests`
-
-Use this skill first when the main decision is how components should collaborate. Hand off to language or framework skills after the ownership shape is clear.
-
-## Canonical references
-
-- Martin Fowler, event-driven pattern distinctions: https://martinfowler.com/articles/201701-event-driven.html
-- Martin Fowler, bounded contexts: https://martinfowler.com/bliki/BoundedContext.html
-- Martin Fowler, anemic domain model: https://martinfowler.com/bliki/AnemicDomainModel.html
-- Microsoft domain events guidance: https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/domain-events-design-implementation
-- Microservices.io database per service: https://microservices.io/patterns/data/database-per-service.html
-- Confluent data ownership: https://developer.confluent.io/courses/microservices/data-ownership/
-
-## Verification checklist
-
-Before finishing, confirm that you:
-- identified the real owner for each important decision, state change, or side effect
-- chose direct calls, orchestration, events, projections, queries, or adapters deliberately
-- removed or justified forwarding layers
-- kept mutable state with one owner
-- separated requests from facts
-- kept independent downstream reactions out of source-of-truth owners
-- made failure, retry, ordering, and recovery visible where they matter
-- avoided adding eventing or indirection for style alone
-- handed off to language or framework skills only after the collaboration shape was clear
+Explain the chosen owner and collaboration shape, the material tradeoff, and any verification limit. For implementation requests, finish the requested change and relevant verification without treating skill routing or the first draft as a review gate.

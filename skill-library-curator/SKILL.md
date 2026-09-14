@@ -1,7 +1,7 @@
 ---
 name: "skill-library-curator"
-version: "1.3.0"
-description: "Review and improve a global or repo-local Agent Skill library. Use for periodic curation, unclear or outdated instructions, duplicate consolidation, local-to-global promotion, archive moves, and curation reports."
+version: "1.4.0"
+description: "Curate global or repo-local skill libraries: review skills, reduce unnecessary instructions, consolidate overlaps, and report improvements. Use for library reviews or maintenance."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -17,13 +17,25 @@ Keep user-owned skill libraries useful and coherent. For authoring one skill wit
 
 Resolve the requested source roots from the user and local agent context, including `SELF-IMPROVE.md` when present. Global sources hold reusable user-owned skills; repo-local sources usually live at `<target-repo>/.agents/skills`. Use concrete paths for operations and keep machine bindings out of reusable skill content. Ask only if a source needed for a write remains ambiguous.
 
-Inspect the worktree before changing it and preserve unrelated edits. Inventory every candidate package in scope, including its `SKILL.md`, README, and bundled support files. Exclude archives, scratch output, caches, and generated installs from the active library. Inspect/report externally owned packages when included in scope, but do not modify vendor, registry/package-managed, or submodule skills without explicit authorization. Installed copies are not source.
+Inspect the worktree before changing it and preserve unrelated edits. Inventory every candidate package in scope, including committed and untracked skills, nested packages, and bundled support files. Account for every discovered `SKILL.md`; distinguish active skills from examples and nested external packages. Exclude archives, scratch output, caches, and generated installs from the active library. Inspect/report externally owned packages when included in scope, but do not modify vendor, registry/package-managed, or submodule skills without explicit authorization. Installed copies are not source.
 
 ## 2. Judge purpose before wording
 
 For each skill, determine the task it enables and the behavior its instructions improve. Challenge its assumptions, overlap, and procedural cost. Existing or lengthy content is not evidence that it is necessary.
 
 Leave useful guidance alone. Delete duplicated, obsolete, or obvious instructions before reorganizing them; moving unnecessary policy into references does not make it useful. Add requirements only to address a demonstrated gap. A small skill can have a valid independent purpose.
+
+For every global or repo-local curation, apply [OpenAI's guide to rethinking skills and prompts for GPT-6 Astra](https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra):
+
+- **Selection:** Keep descriptions short and specific to the task. Check competing triggers and unnecessary skill loading across the library.
+- **Loading:** Route independent workflows to relevant supporting files; remove unnecessary content before splitting it. Avoid unconditional document or companion-skill reads.
+- **Procedure:** Retain useful commands, domain constraints, and failure handling; challenge rigid recipes and repeated test mandates without a task-specific purpose.
+- **Context:** Inspect applicable `AGENTS.md` and agent/task templates for conflicting or excessive requirements. Report issues outside the editable scope.
+- **Autonomy:** Check whether approval gates respect existing authorization. Preserve real ownership, destructive-action, and user-requested review boundaries.
+- **Completion:** Define the expected result, appropriate verification, repair of affected failures, and stopping point. Avoid ending authorized work at a first draft.
+- **Portability:** Consider the models sharing the instructions; do not assume every agent is Astra or remove useful safeguards solely on that basis.
+
+Use these checks directly; the article is their rationale, not an additional mandatory read for each run. Judge changes by behavior, not word-count targets. Record concrete evidence per skill and distinguish static findings from untested improvement hypotheses.
 
 Record a judgement and reason for each inspected skill:
 
@@ -53,6 +65,8 @@ Archive whole skills by default; permanent deletion requires explicit authorizat
 
 Bump versions for behavior changes. Check frontmatter, name/folder agreement, support links, and complete archives. Check positive and near-miss prompts when triggers change. Test changed behavior with realistic isolated scratch tasks using `create-skill`'s verification procedure when available; do not treat trigger selection alone as behavioral proof.
 
+For reduced instructions or relaxed gates, compare the existing and proposed behavior on a representative task when feasible. Check that useful constraints survive and authorized work reaches completion. Reuse valid evidence; rerun affected cases after failures or changes, and disclose when no behavioral comparison was performed.
+
 For global changes, run the configured refresh command with its exact agent scope unless the user requested source-only work. Do not substitute `--all` for a scoped install. A missing refresh command need not block source work: report refresh as incomplete. Repo-local-only changes do not need a global refresh.
 
-Report inspected scope, each skill's judgement, concrete changes and reasons, source/target/archive paths for moves, validation, refresh results, and unresolved decisions. Use a compact table or the user's requested format; create a separate report file only when requested or useful for resuming a large review. Omit empty change categories.
+Report inspected scope, each skill's judgement and guide-based findings, concrete changes and reasons, source/target/archive paths for moves, validation, refresh results, and unresolved decisions. Separate recommendations from applied changes and reconcile the report with the inventory. Use a compact table or the user's requested format; create a separate report file only when requested or useful for resuming a large review. Omit empty change categories. Complete authorized edits, affected verification, and refresh before reporting completion; for review-only requests, deliver findings and proposed changes.

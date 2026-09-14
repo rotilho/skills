@@ -1,7 +1,7 @@
 ---
 name: "design-extractor"
-version: "1.0.1"
-description: "Create, audit, or refresh a DESIGN.md design-system file from visual and product references such as screenshots, Figma exports, existing CSS, Tailwind configs, design tokens, brand notes, sample pages, or app UI. Use when the task asks for DESIGN.md, design extraction, design-system inference, or converting scattered design evidence into structured tokens and guidance. Count the source references used for each section or major token group, and surface conflicts, inconsistencies, and inferred decisions instead of hiding uncertainty."
+version: "1.1.0"
+description: "Create, audit, or refresh DESIGN.md from product visuals, source code, design tokens, or brand references. Use for design-system extraction, not ordinary frontend implementation."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -11,204 +11,54 @@ metadata:
 
 # Design Extractor
 
-Use this skill to turn existing design evidence into a compliant `DESIGN.md`.
+Turn product evidence into a compliant `DESIGN.md`, with traceable source counts and visible conflicts or inferences.
 
-## Reference files
+## Choose the requested operation
 
-- Read `references/docs/spec.md` when exact `DESIGN.md` schema, section order, token rules, or consumer behavior matters.
-- Read `references/examples/*/DESIGN.md` when you need examples of the expected tone, token shape, and section density.
-- Do not load the bundled CLI source unless debugging validation behavior or parser/linter details.
+- **Create/extract:** inspect the relevant product surfaces, build an evidence matrix, and write a complete document. Use the [starting structure](templates/design.md) when a new document needs it.
+- **Audit:** compare the specified document or areas with the supplied evidence and report discrepancies. An audit alone does not authorize rewriting the target document.
+- **Focused refresh:** update the requested areas and their dependent tokens or prose. Recheck their evidence and references; preserve unaffected content and provenance. Do not rebuild the entire extraction unless the change requires it.
 
-## When to use
+For isolated tests, write artifacts outside the target repo in the requested scratch/workbench directory unless target edits are explicitly authorized.
 
-Trigger for work like:
-- create `DESIGN.md` from screenshots, Figma frames, CSS, Tailwind config, tokens, or brand notes
-- extract a design system from an existing app or website
-- audit whether a `DESIGN.md` matches the provided references
-- merge multiple design references into one coherent design-system source of truth
-- identify conflicts between visual references, implementation tokens, and written design guidance
+## Load relevant format guidance
 
-Do not use this skill for ordinary frontend implementation when no durable `DESIGN.md` or design-system extraction is requested.
+- Read [the format spec](references/docs/spec.md) when writing or validating schema, section order, tokens, or consumer behavior.
+- Consult a relevant `references/examples/*/DESIGN.md` only when tone or token shape is unclear.
+- Use the [extraction-note template](templates/extraction-notes.md) when adding provenance. It is not a required separate artifact.
+- Load bundled CLI source only when debugging parser or linter behavior. `references/` is an external submodule; place user-owned templates outside it.
 
-## Hard constraints
+## Establish evidence for the requested scope
 
-- Treat YAML frontmatter tokens as normative values; treat markdown prose as application guidance.
-- Use only one `##` heading per section name; duplicate section headings are invalid.
-- Keep known sections in this order when present: `Overview` or `Brand & Style`, `Colors`, `Typography`, `Layout` or `Layout & Spacing`, `Elevation & Depth` or `Elevation`, `Shapes`, `Components`, `Do's and Don'ts`.
-- Use frontmatter only for the spec-supported token groups: `version`, `name`, `description`, `colors`, `typography`, `rounded`, `spacing`, and `components`.
-- Use valid hex colors in the `colors` map. Put alpha, gradients, blur, shadows, and CSS literals in component tokens or prose unless the spec supports them directly.
-- Use spec component property names where possible: `backgroundColor`, `textColor`, `typography`, `rounded`, `padding`, `size`, `height`, and `width`. Map platform names such as `radius`, `padding-x`, `background`, or `text` into those names instead of copying them directly unless preserving an unknown property is intentional.
-- Prefer token references such as `{colors.primary}` and `{typography.body-md}` inside `components` when a value maps to an existing token.
-- Do not silently average conflicting values. Choose the strongest supported value, then record the conflict.
-- Do not invent source support. Mark low-confidence choices as inferred.
+Assign stable IDs to inspected sources, with their path/URL and type: visual reference, implementation file, token file, brand/product note, generated/prior artifact, or user instruction. For a focused review, identify the reviewed areas so its counts cannot be mistaken for a full-system audit.
 
-## Workflow
+Count distinct references, not repeated observations within one file. Materially different screenshots may count separately. A source supports a choice only when it directly states, implements, or clearly displays that choice.
 
-### Step 1 - Inventory references
+- Exclude this skill's format spec and examples from product-reference counts.
+- Classify generated `DESIGN.md`, evidence matrices, reports, and workbench output before use. Exclude prior extraction artifacts when extracting afresh from raw product sources; use an existing document when auditing, refreshing, migrating, or deliberately comparing it.
+- Classify UI evidence as active, legacy, or unused. Prefer active entrypoints and currently rendered components. Exclude unused material from used-reference counts unless it explains a conflict or migration risk.
 
-Assign stable source IDs before drafting:
+Track candidate values, supporting IDs, counts, conflicts, and confidence in a compact matrix. Keep it in extraction notes or the response; use a sidecar only when requested or needed for a large evidence trail. Full extractions should consider the supported brand, colors, typography, layout/spacing, elevation, shapes, components/states, and practical usage rules. Focused work covers the affected areas without inventing evidence for absent ones.
 
-```md
-R1: <path, URL, screenshot, Figma frame, CSS file, token file, or note> - <source type>
-R2: ...
-```
+## Resolve differences and choose tokens
 
-Use these source types:
-- visual reference
-- implementation file
-- token file
-- brand or product note
-- generated or prior design artifact
-- user instruction
+Check for inconsistent values, semantic roles, interaction states, inaccessible color combinations, and mismatches between tokens, prose, and rendered UI. Prefer the current source of truth named by the user, then active tokens/theme config, repeated current implementation, repeated visual evidence, brand notes, and finally labeled inference. If strong sources disagree, show both and explain the choice; never silently average values or invent support.
 
-Count distinct references, not repeated observations inside one source. Multiple screenshots of materially different screens or states may count separately. A source supports a token or section only when it directly states, implements, or clearly displays the relevant choice.
+Create the smallest reusable token set supported by the evidence. Keep one-off decoration in prose. Map platform dimensions into spec-valid values and disclose conversions such as Compose `sp` to `px`. Omit or label inferred line heights, weights, and letter spacing instead of silently guessing.
 
-Do not count this skill's own `references/docs/spec.md` or example `DESIGN.md` files as design evidence for the target product. You may list them as format references if useful, but exclude them from inspected/used design-reference counts.
+Preserve these format constraints:
 
-When the target repo already contains generated extraction artifacts such as `DESIGN.md`, `evidence-matrix.md`, `final-report.md`, or prior workbench outputs, classify them as generated/prior design artifacts before using them. For isolated reruns or tests against raw product sources, exclude those artifacts from design evidence by default and mention that exclusion. Use an existing target `DESIGN.md` as evidence only when the task is to audit, refresh, migrate, or intentionally compare against that prior artifact.
+- Frontmatter tokens are normative; Markdown explains their application. Use the supported groups: `version`, `name`, `description`, `colors`, `typography`, `rounded`, `spacing`, and `components`.
+- Use each `##` section name once, with known sections in spec order. Include only relevant sections.
+- Use valid hex values for the colors map. Put unsupported alpha, gradient, blur, shadow, or CSS literals in component tokens or prose.
+- Prefer spec component properties (`backgroundColor`, `textColor`, `typography`, `rounded`, `padding`, `size`, `height`, `width`) and references such as `{colors.primary}`. Translate platform property names; preserve unknown properties only intentionally.
 
-If you inspect inactive components, unused assets, or older source files only to classify them as legacy or not rendered, list them as legacy/unused evidence separately. Do not include them in used-reference counts unless they materially explain a conflict or migration risk.
+## Deliver and validate
 
-### Step 2 - Build an evidence matrix
+Complete the requested document, patch, or audit findings. Include inspected/used source counts, support per affected section or token group, conflicts, and inferred choices. By default use `## Extraction Notes`; for a clean production document put the evidence in the response or a requested sidecar. Do not remove existing provenance merely to shorten the output.
 
-Before writing `DESIGN.md`, create a compact working matrix. Keep it in `## Extraction Notes` or the final response; use an `evidence-matrix.md` sidecar when the support trail is too large to include there or the user requests one.
+For created or changed documents, check frontmatter delimiters, unique headings and section order, color/dimension values, and token-reference resolution, including dependents of changed tokens. Audit findings should state which areas were actually checked.
 
-```md
-| Area | Candidate choice | Supporting refs | Count | Conflicts / inconsistencies | Confidence |
-|---|---|---:|---:|---|---|
-| Colors.primary | #... | R1, R3 | 2 | R2 uses #... | high |
-```
+Run `npx @google/design.md lint DESIGN.md` when the package is available and full format validation is relevant. Fix real reference errors; document intentional warnings. Unused semantic tokens expressed in prose can produce valid warning-only output. If tooling is unavailable, blocked, or unnecessary for a focused audit, report that the linter did not run and describe the manual checks. Never imply linter execution from manual review.
 
-Track at least:
-- brand personality and target feel
-- color palettes and semantic roles
-- typography families, levels, weights, line heights, and letter spacing
-- spacing, layout grid, margins, density, and responsive behavior
-- elevation, shadows, blur, borders, and layering
-- radius and shape language
-- component styles and interaction states
-- practical do's and don'ts
-
-### Step 3 - Resolve conflicts explicitly
-
-Look for:
-- token values that differ from CSS, Tailwind, screenshots, or prose
-- screenshots that show different radii, spacing, density, shadows, or typography for the same component
-- brand notes that describe a mood the implemented UI does not express
-- inconsistent semantic color usage, especially primary actions, errors, surfaces, and text colors
-- component prose that cannot be represented by current tokens
-- missing evidence for required or expected token groups
-- accessibility issues such as linter-reported color contrast failures, especially for buttons, badges, links, text on accents, and data states
-
-Resolve by preferring, in order:
-1. user-provided current source of truth
-2. existing design tokens or theme config
-3. repeated implementation values
-4. repeated visual evidence across screens
-5. brand/product notes
-6. clearly labeled inference
-
-If the strongest source conflicts with repeated visual evidence, surface both and explain the chosen direction.
-
-When a repo contains multiple generations of UI, classify evidence as active, legacy, or unused before choosing. Prefer active entrypoints, currently rendered screens, shared components imported by those screens, and repeated current values. Treat older theme files, unused assets, or superseded components as conflicts or legacy notes rather than equal-weight evidence.
-
-### Step 4 - Draft tokens
-
-Create the smallest token set that can reproduce the observed system:
-- colors: semantic roles, surfaces, text colors, outlines, error states, and repeated accents
-- typography: the levels and properties supported by the references
-- rounded: named scale values used by real components
-- spacing: base unit, gaps, margins, container widths, and repeated component padding
-- components: buttons, inputs, cards, lists, badges, navigation, and domain-specific components with variants as separate keys
-
-Translate platform units into spec-valid dimensions. For example, Compose `dp` and web `px` can become `px`; Compose `sp` may become `px` only when you record that it is a platform-to-spec conversion. If line height, letter spacing, or font weight is implicit in the source, omit it or mark it inferred instead of guessing silently.
-
-Keep one-off decoration in prose unless it appears as a reusable system rule.
-
-### Step 5 - Write DESIGN.md
-
-Use this structure by default:
-
-```md
----
-version: alpha
-name: <Design system name>
-description: <optional short description>
-colors:
-  ...
-typography:
-  ...
-rounded:
-  ...
-spacing:
-  ...
-components:
-  ...
----
-
-## Brand & Style
-
-## Colors
-
-## Typography
-
-## Layout & Spacing
-
-## Elevation & Depth
-
-## Shapes
-
-## Components
-
-## Do's and Don'ts
-
-## Extraction Notes
-```
-
-Use `## Extraction Notes` unless the user requests a clean production-only `DESIGN.md`. This unknown section is allowed by the spec and should include:
-
-```md
-## Extraction Notes
-
-- References inspected: <total>
-- References used in tokens or prose: <count>
-- Low-confidence or inferred decisions: <count>
-
-### Reference IDs
-
-- R1: <path or source> - <source type>
-- R2: <path or source> - <source type>
-
-| Area | Supporting refs | Count | Confidence |
-|---|---|---:|---|
-| Colors | R1, R2 | 2 | high |
-
-### Conflicts and Inconsistencies
-
-- <area>: <conflict>, chosen <value/rule> because <source reason>.
-
-### Inferred Decisions
-
-- <area>: <decision> inferred from <refs or pattern>.
-```
-
-If the user wants no extraction notes inside `DESIGN.md`, put the same counts and conflicts in a sidecar note or final response.
-
-For isolated skill tests, write requested artifacts to the scratch or workbench directory and do not modify the target repo unless the user explicitly asks.
-
-### Step 6 - Validate
-
-Before finishing:
-- confirm YAML frontmatter starts and ends with `---`
-- confirm no duplicate `##` section headings exist
-- confirm known sections are in spec order
-- confirm color tokens are valid hex values
-- confirm typography values use valid dimensions or numbers
-- confirm component token references resolve
-- run `npx @google/design.md lint DESIGN.md` when the package is available
-- if the linter reports warnings, either fix warnings that indicate real broken references or document intentional warning-only tradeoffs in the final response
-- do not treat warning-only lint output as a failed extraction when the warnings are caused by deliberate semantic tokens that are used in prose but not directly referenced by component tokens
-- if validation tooling is unavailable, blocked by sandbox/network/package resolution, or intentionally skipped, report that the linter did not run and perform the manual checks above
-- never claim linter results unless the linter command actually ran; keep manual validation and linter validation as separate report items
-
-Report the files written, source counts, unresolved conflicts or inferences, and validation results. Use a separate report file only when requested.
+Report the artifact paths, evidence scope/counts, unresolved conflicts or inferences, and validation results. A separate final report is needed only when requested.

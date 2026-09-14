@@ -1,7 +1,7 @@
 ---
 name: "orchestrated-kanban-subagents"
-version: "1.2.0"
-description: "Coordinate Kanban-backed project work through a main-session orchestrator and task-scoped planner, executor, and optional reviewer subagents. Use when the user wants this workflow: persisted task plans, review before execution, and resumable progress. Ordinary subagent use or local task tracking alone does not require it."
+version: "1.3.0"
+description: "Coordinate user-requested Kanban work through planner and executor subagents, persisted plans, and main-session review. Ordinary subagent use or local task tracking alone does not require this workflow."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -15,7 +15,7 @@ Keep project state in Kanban and task execution in subagents. The main session r
 
 ## Prerequisites and scope
 
-- Use `local-kanban-board` for board setup and CLI operations. This skill adds worker coordination, not another task system.
+- Use the relevant `local-kanban-board` guidance for board operations; setup applies only to a new board. For read-only status inspection, read the existing Markdown without invoking the CLI, which sources shell config and may write files.
 - Use when the user requests this coordination model; do not introduce it just because a task uses a subagent or needs a checklist.
 - Honor the user's worker limit and runtime capacity. Parallelize only work with independent file ownership; one assignment covers one task unless the user requests a bundle.
 - The main session coordinates rather than implementing task code. If it must perform a small unblocker because a worker lacks permissions or tooling, record that exception in the task.
@@ -26,7 +26,7 @@ Keep project state in Kanban and task execution in subagents. The main session r
 
 Read `kanban/BOARD.md` and the relevant task files. Create missing tasks and dependencies through `kanban/scripts/kanban`. Select work whose dependencies are closed; do not silently bypass waiting tasks.
 
-Keep task intent in the body and history in `## Notes`. Use the CLI for metadata and notes; directly edit the task body to maintain its description, plan, and acceptance criteria. Coordinate board mutations serially because workers share task files and generated board output.
+Keep task intent in the body and use the CLI for metadata and appended history. The CLI writes history at end of file; preserve custom sections and keep `## Notes` last in new templates so history lands there. Directly edit the body for description, plan, and acceptance criteria. Coordinate board mutations serially because workers share task files and generated board output.
 
 ### 2. Plan and review
 
@@ -38,7 +38,7 @@ Assign a planner one task ID and the relevant repo scope. It inspects the task a
 
 The planner reports the task path and key decisions; it need not repeat the full plan in chat. A plan that exists only in chat or notes is incomplete.
 
-The main session reads and reviews the persisted plan before dispatching an executor. Return concrete feedback to the planner when needed. Reuse an existing plan when it still fits the current task and code; revise it when scope, ownership, criteria, or verification changes.
+The main session reads and reviews the persisted plan before dispatching an executor. This is the plan approval step; it does not require a new user confirmation for already-authorized work. Return concrete feedback to the planner when needed. Reuse an existing plan when it still fits the current task and code; revise it when scope, ownership, criteria, or verification changes.
 
 ### 3. Execute the approved task
 
@@ -62,5 +62,5 @@ Continue through the requested scope until tasks are done, explicitly deferred b
 
 - Executed tasks have reviewed body plans and recorded implementation/verification results.
 - Accepted tasks are closed by the designated reviewer; remaining work has explicit status and next actions.
-- `kanban/scripts/kanban validate` passes after structural changes and before finishing. Inspect body content separately; CLI validation does not prove plan quality or completion.
+- Run `kanban/scripts/kanban validate` after board metadata, dependency, config, or layout mutations, or when CLI validation is requested. It regenerates the snapshot; skip it for body-only edits and read-only inspection. Review dependency chains and body content separately because validation does not detect multi-task cycles or prove plan quality or completion.
 - The final response states completed work, blockers, and verification, after required workers finish.

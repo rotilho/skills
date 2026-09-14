@@ -8,6 +8,8 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 |---|---|---|
 | "Capture the reusable debugging procedure we learned and put it in the existing source skill." | `auto-skill-capture` | Retaining an uncovered procedural lesson. |
 | "Review every skill's purpose and overlap; remove instructions that add no value." | `skill-library-curator` | Library-wide curation before wording changes. |
+| "Curate my global skills using the OpenAI Astra skills and prompts guide." | `skill-library-curator` | Global library review with model-aware instruction assessment. |
+| "Review every skill in this repo, including committed and nested packages, for unnecessary instructions." | `skill-library-curator` | Complete repo inventory and instruction review. |
 | "Refactor this function for clearer naming and ownership without using framework-specific rules." | `code-practice` | Framework-neutral maintainability. |
 | "Diagnose this failing workflow first, then make the smallest compatibility-preserving API change and test the contract directly." | `code-practice` | Evidence-first diagnosis, public-surface safety, and test-level choice without framework specifics. |
 | "Reorganize this module's files around its existing workflows and improve generic names; keep component interactions and state ownership unchanged." | `code-practice` | File organization and naming without redesigning component collaboration. |
@@ -19,9 +21,12 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Create a new skill for release-note generation and include trigger eval prompts plus a realistic behavior simulation." | `create-skill` | Skill authoring, trigger evaluation, and behavior simulation. |
 | "Research current options for hosted vector databases and recommend one with sources." | `deep-research` | Multi-source evidence-backed research. |
 | "Create a DESIGN.md from these screenshots, Tailwind config, and brand notes; count which references support each section and flag inconsistencies." | `design-extractor` | DESIGN.md extraction with evidence counts and conflicts. |
+| "Audit only the primary button color in this DESIGN.md against the current CSS; report the discrepancy without rewriting the document." | `design-extractor` | Focused design audit with a read-only completion boundary. |
 | "Use a temporary Podman image to install a RAW converter and write the converted files to /tmp without installing anything on the host." | `ephemeral-container-workbench` | One-off tool installation isolated in a disposable container. |
 | "Build this project's GraalVM native binary in Podman using the same toolchain as CI." | `graalvm-native-build` | Native-image build and toolchain parity. |
+| "Diagnose this native-image build log against CI and give reproduction commands; do not edit application source." | `graalvm-native-build` | Native-build diagnosis with source changes outside scope. |
 | "Clean up these Kotlin extensions, nullability checks, and coroutine scope ownership." | `kotlin-code-style` | Kotlin-specific implementation style. |
+| "Fix only this Kotlin comment typo using the repository formatter." | `kotlin-code-style` | Mechanical Kotlin edit without a general engineering review. |
 | "In this Kotlin multiplatform library, replace runtime platform branches with source-set-owned behavior and add validation tests with positive, negative, round-trip, and boundary cases." | `kotlin-code-style` | Kotlin library style, expect/actual boundaries, validation, and test shape. |
 | "Format these Kotlin changes with the repository's ktlint task and run the focused Gradle test in a sandbox where the default Gradle home is read-only." | `kotlin-code-style` | Kotlin-specific formatting and focused Gradle verification workflow. |
 | "Review these Kotlin Cucumber feature files and step definitions for BDD quality." | `kotlin-cucumber-tests` | Cucumber feature/step design. |
@@ -33,7 +38,9 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Clean up this Spring Boot app so controllers stay thin, feature config validates at startup, and async event tests prove downstream observable state." | `spring-application-code-style` | Spring application edges, configuration, async events, and validation. |
 | "Run these Spring Boot AOT-backed Gradle test tasks without colliding on processTestAot output." | `spring-application-code-style` | Spring AOT verification and generated-output ownership. |
 | "Decide where this architecture decision belongs in the repo wiki and link related pages." | `wiki` | Durable knowledge-base organization. |
+| "Create a small wiki from these architecture notes and link it from README; the repo has no docs directory yet." | `wiki` | Authorized wiki creation includes choosing a conventional location. |
 | "Create a local Markdown Kanban board with task dependencies for this repo." | `local-kanban-board` | Persistent repo-local task tracking. |
+| "Read the existing Kanban files and report ready tasks without changing the board." | `local-kanban-board` | Read-only board inspection does not require CLI validation. |
 | "Use Kanban with planner and executor subagents; keep the main session reviewing persisted plans and completed work." | `orchestrated-kanban-subagents` | Requested coordination model with plans and review. |
 | "Resume the Kanban project as coordinator, reviewing task plans before dispatching workers." | `orchestrated-kanban-subagents` | Resumption of the same coordination model. |
 
@@ -43,6 +50,7 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 |---|---|---|
 | "We read twelve files and ran the existing tests; nothing new was learned. Summarize the result." | `auto-skill-capture` | Normal task reporting. |
 | "Write one new skill for inspecting archive contents." | `skill-library-curator` | `create-skill` |
+| "Explain the OpenAI article about Astra skills and prompts." | `skill-library-curator` | Official documentation research; no library curation requested. |
 | "Use a subagent to review this small patch." | `orchestrated-kanban-subagents` | Ordinary delegated review. |
 | "Move TASK-003 to review on the local board." | `orchestrated-kanban-subagents` | `local-kanban-board` |
 | "Make a quick checklist in the PR description." | `local-kanban-board` | Normal prose editing. |

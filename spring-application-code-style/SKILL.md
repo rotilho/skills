@@ -1,7 +1,7 @@
 ---
 name: "spring-application-code-style"
-version: "1.0.3"
-description: "Apply Spring Boot application-layer conventions for package structure, thin controllers, services, repositories, transactions, feature-owned configuration properties, bean wiring, semantic validation boundaries, events, async observable-state tests, observability, integration testing, and serial Spring AOT verification. Use when the user wants Spring application structure, architecture, wiring, or AOT-generated test workflow guidance, including coroutine or Flow usage inside Spring-managed code, especially for WebFlux or coroutine-first services, not shared libraries or framework internals. When this skill loads, also load `code-practice` as the shared engineering base layer."
+version: "1.1.0"
+description: "Apply Spring Boot application conventions for controller/service boundaries, wiring, validation, transactions, events, and integration tests. Use also for Spring AOT verification; skip plain Kotlin style and framework internals."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -11,155 +11,77 @@ metadata:
 
 # Spring Application Code Style
 
-Use this skill for Spring application conventions.
+Apply the sections relevant to the Spring-managed boundary being changed or reviewed. Follow local conventions; do not invent mandatory Bean Validation, global exception advice, or slice-test rules without repository evidence.
 
-## Required companion skill
+For AOT output collisions or build-only verification, go directly to [Verification and Spring AOT](#verification-and-spring-aot). A narrow configuration or build repair does not require an application-wide architecture review.
 
-Immediately load `code-practice` after loading this skill.
+## Related guidance
 
-Use `code-practice` for shared naming, ownership, boundaries, state, error handling, testing, and abstraction defaults. Then use this skill to refine or override those defaults only where Spring application lifecycle, framework boundaries, or infrastructure concerns change the recommendation.
+Load another skill only when its decisions are part of the task and its guidance is not already available:
 
-## When to use
+- `code-practice`: framework-neutral ownership, state invariants, trust boundaries, error handling, or test design. New or changed code-based tests retain its explicit `Given`, `When`, and `Then` comment sections.
+- `component-collaboration-architecture`: deciding between direct calls and events, forwarding chains, projections, or cross-component ownership.
+- `kotlin-code-style`: Kotlin types, extensions, nullability, coroutine mechanics, and Kotlin formatting.
 
-Trigger for work like:
-- Spring Boot code style
-- Spring application conventions
-- controller, service, and repository boundaries
-- WebFlux or coroutine-first Spring structure
-- `@ConfigurationProperties` and bean wiring
-- Spring transactions, events, scheduling, or integration tests
-- Spring AOT-generated test tasks or generated-output collisions
+## Application boundaries and wiring
 
-Do not use this skill for plain Kotlin style or language-agnostic coding guidance when the question is not tied to Spring-managed boundaries.
+- Organize by feature or workflow rather than technical packages such as `service`, `handler`, `config`, `dto`, or `event`. Keep root application packages for bootstrap, composition, entrypoints, and shared public API.
+- Controllers translate protocol and framework concerns. Keep business sequencing, transactions, and background coordination with the owning feature workflow.
+- Keep repositories and persistence adapters near the feature they persist unless they are shared infrastructure. Other services and listeners call the feature owner rather than accessing its repository directly.
+- Prefer `@Component` for application-owned collaborators with simple constructor wiring. Use `@Bean` for external objects, factories, properties, lifecycle scopes, or non-trivial wiring.
+- Keep configuration with the feature it wires. Root or shared configuration fits bootstrap, external clients, infrastructure factories, lifecycle scopes, and cross-feature composition; avoid classes added only for symmetry.
+- Use `suspend` controller methods for one-shot endpoints and `Flow` only for real streams. Keep Spring-managed background work in its owning lifecycle; do not push ordinary business logic into framework abstractions without a need.
+- Use scheduled processors for bounded maintenance or draining work, with operational logs and metrics where the workflow needs them.
 
-## Hard constraints
+## Configuration and validation
 
-- this skill is application-only, not a generic Spring or library skill
-- load and use `code-practice` for framework-neutral defaults
-- use `kotlin-code-style` for pure Kotlin concerns unless they are directly tied to Spring usage
-- do not infer unsupported house rules such as mandatory Bean Validation, global exception advice, or slice-test defaults unless the local codebase shows them
-- do not overlap independent Gradle invocations that write to the same Spring AOT generated output, such as concurrent invocations of `processTestAot`
+Use dedicated, simple `@ConfigurationProperties` classes per namespace instead of scattered raw property lookups. Validate critical configuration at startup with checks close to the property, bean, or external-client wiring that needs the invariant.
 
-## Workflow
+Keep validation at the right boundary:
 
-### Step 1 - Find the Spring boundary in question
+- Controllers and message adapters handle protocol shape, binding, and authentication context.
+- Feature workflows own semantic business rules, including when multiple entrypoints call the same workflow.
+- Startup checks enforce configuration and wiring invariants.
 
-Classify the request around one or more of:
-- package or feature organization
-- controller design
-- request and response DTO boundaries
-- service orchestration
-- repository and persistence boundaries
-- transaction scope
-- configuration properties and bean wiring
-- scheduling, events, or observability
-- Spring integration tests
+DTO annotations, persistence constraints, and framework binding errors must not be the only enforcement of a business rule that other callers can bypass.
 
-### Step 2 - Apply Spring application defaults
+## Events and asynchronous behavior
 
-Prefer these defaults unless local evidence says otherwise:
-- organize by feature or workflow first, not by technical layer
-- keep root application packages for bootstrap, composition, entrypoints, and shared public API only
-- keep controllers focused on protocol and framework translation
-- keep business sequencing in the owning feature package
-- use `@EventListener` in a behavior owner when it owns the resulting state change, side effect, projection, or lifecycle transition; avoid listener classes that only forward
-- keep repositories behind the owning service or workflow; event listeners and other services should call that owner instead of reaching into another feature's repository directly
-- keep repositories and persistence adapters near the feature they persist unless persistence is shared infrastructure
-- keep configuration feature-owned when it wires one feature
-- use root or shared configuration only for app bootstrap, external clients, infrastructure factories, lifecycle scopes, or cross-feature composition
-- prefer `@Component` for application-owned collaborators with simple constructor wiring
-- use `@Bean` for external objects, factories, properties, lifecycle scopes, or non-trivial wiring
-- keep transactional boundaries out of controllers
-- validate critical configuration at startup with simple checks close to the property or bean that needs the invariant
-- separate protocol and framework validation from semantic validation owned by the feature workflow
-- use operational logging and metrics where workflows need them
+Once event-based collaboration fits the consistency and failure contract, put `@EventListener` on the owner of the resulting state transition, projection, side effect, or lifecycle action. Avoid broad listeners mixing unrelated workflows and listener classes that only forward a call without owning behavior.
 
-### Step 3 - Use the right Spring patterns
+Publish after commit when consumers require durable state. Publishing a fact before the related write commits needs an explicit consistency tradeoff.
 
-Prefer:
-- `suspend` controller methods for one-shot endpoints
-- `Flow` endpoints only for real streams
-- dedicated `@ConfigurationProperties` classes per config namespace
-- constructor-bound or otherwise simple configuration properties whose usage validates quickly at startup
-- after-commit event publication when consumers need durable state
-- tests that trigger the upstream command and assert the downstream observable state when event delivery is asynchronous
-- scheduled processors for bounded maintenance or draining work
-- `@SpringBootTest` and real infrastructure when framework wiring or persistence is part of the contract
-
-### Step 4 - Avoid framework misuse
-
-Push back on:
-- controllers owning write orchestration or background coordination
-- `service`, `manager`, `processor`, `handler`, `config`, `dto`, `model`, or `event` packages created only by technical type
-- feature logic placed in root application packages
-- configuration classes added only for symmetry
-- shared configuration for one feature's private settings
-- property values used deep in a workflow without startup validation when invalid values would break later behavior
-- broad event or listener classes that mix unrelated feature workflows
-- `@EventListener` methods that only call another component without owning validation, state, lifecycle, retry, translation, or a side effect
-- tests that mock the listener directly when the real contract is that an upstream action eventually changes downstream state
-- raw property lookups spread through the codebase
-- publishing downstream facts before the related write commits without an explicit tradeoff
-- pushing simple business logic into framework abstractions for no gain
-- using Bean Validation, HTTP binding errors, or DTO constraints as a substitute for semantic validation that belongs to the feature
-
-### Step 4a - Spring event listener examples
-
-Prefer behavior-owned event listeners:
+For asynchronous event behavior, trigger the upstream command and assert downstream observable state with bounded waiting. Calling or mocking the listener directly does not prove that delivery and wiring work:
 
 ```kotlin
-@Component
-class InventoryReservations(private val events: DomainEvents) {
-    @EventListener
-    fun onOrderPlaced(event: OrderPlaced) {
-        reserved[event.sku] = (reserved[event.sku] ?: 0) + event.quantity
-        events.publish(InventoryReserved(event.orderId, event.sku, event.quantity))
-    }
-}
-```
+// Given
+val order = anOrder()
 
-For async event flows, test the externally visible result instead of the listener method:
-
-```kotlin
+// When
 orders.place(order)
 
+// Then
 await().untilAsserted {
     assertThat(inventory.reservationFor(order.id)).isEqualTo(ReservationStatus.RESERVED)
 }
 ```
 
-### Step 5 - Keep ownership boundaries clear
+## Verification and Spring AOT
 
-If the issue is:
-- direct calls vs events, proxy/listener chains, projections, or ownership across components: use `component-collaboration-architecture`
-- general API design, mutation, logging, or testing defaults: use `code-practice`
-- Kotlin file layout, extensions, nullability, or coroutine mechanics outside Spring boundaries: use `kotlin-code-style`
+Select checks for the changed contract. Use `@SpringBootTest` and real infrastructure when framework wiring or persistence is part of that contract. For asynchronous changes, verify the relevant downstream result; for configuration changes, check binding and startup validation as applicable. Formatting or comment-only work needs formatting checks, with tests only when a repository rule requires them.
 
-### Step 6 - Keep validation layers distinct
+For Kotlin edits, follow the repository formatter convention, including `ktlintFormat` when available; use `kotlin-code-style` for its execution details when needed.
 
-Prefer:
-- protocol validation at controllers and message adapters for shape, binding, and authentication context
-- semantic validation in the feature workflow that owns the business rule
-- startup validation for configuration invariants and external-client wiring
+When Spring AOT generation is involved:
 
-Do not let DTO annotations, persistence constraints, or framework binding errors become the only place a business rule is enforced when other callers can reach the same workflow.
+- Identify the Gradle tasks and generated-output paths involved in the requested check.
+- Do not overlap independent Gradle invocations that write the same AOT output, such as concurrent `processTestAot` invocations. Run those writers serially; independent checkouts or output directories can be used when isolation is established.
+- If a writer collision caused a failure, wait for the active writer to finish or stop a redundant writer started for this task before rerunning the affected check. Do not add unrelated test runs merely because AOT is present.
+
+Complete the requested work and fix failures caused by it. Review the touched boundaries, configuration, events, or AOT writers; mechanisms absent from the change do not create extra checks or refactors.
 
 ## Canonical references
 
 - Spring Boot reference: https://docs.spring.io/spring-boot/index.html
 - Spring Framework reference: https://docs.spring.io/spring-framework/reference/
 - Spring Guides: https://spring.io/guides
-
-## Verification checklist
-
-Before finishing, confirm that you:
-- kept the guidance Spring-application-specific
-- kept controllers thin and orchestration elsewhere
-- kept Spring annotations, lifecycle, and infrastructure concerns at application boundaries
-- kept configuration feature-owned unless it is shared infrastructure
-- treated event listeners as owners of side effects or state transitions, not forwarding glue
-- tested async event behavior through downstream observable state
-- prevented overlapping Gradle invocations from writing the same Spring AOT output
-- separated semantic validation from protocol/framework validation
-- avoided inventing unsupported framework house rules
-- did not drift into generic or Kotlin-only guidance

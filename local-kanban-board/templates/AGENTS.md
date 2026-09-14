@@ -1,5 +1,9 @@
 # Agent Instructions
 
-Use the installed `local-kanban-board` skill when planning, resuming, tracking, or archiving project work.
+Use the installed `local-kanban-board` skill for work managed by this repo's `kanban/` board.
 
-The board state lives in `kanban/`. Inspect `kanban/BOARD.md` first. Use `kanban/scripts/kanban` for metadata and notes; edit task descriptions, plans, and acceptance criteria directly. Serialize board mutations and run `kanban/scripts/kanban validate` before finishing Kanban-related work.
+Read `kanban/BOARD.md` and relevant task files; task files are authoritative. Use `kanban/scripts/kanban` for metadata and notes; edit descriptions, plans, and acceptance criteria directly while preserving metadata and history. Keep existing config, scripts, and templates when resuming.
+
+Serialize board mutations. Run `kanban/scripts/kanban validate` after metadata, dependency, config, or layout changes, then inspect the affected task and snapshot. Validation checks structure, not multi-task dependency cycles or work completion.
+
+For read-only status or review, inspect files directly. Every nonempty CLI invocation sources shell config and creates missing directories; `board` and successful `validate` rewrite the snapshot.
