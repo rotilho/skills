@@ -41,6 +41,7 @@ User-owned active skills:
 | `runtime-flow-mapping` | Tracing or verifying an existing runtime path across calls, events, workers, callbacks, and transactions; producing source-backed flow maps. | Choosing a new collaboration architecture, routine code edits, or general wiki organization. |
 | `skill-library-curator` | Periodic curation of global or repo-local skills, duplicate merges, promotions, embeddings, archive moves, vague skill cleanup, and curation reports. | Creating one new skill without reviewing the broader library. |
 | `spring-application-code-style` | Spring Boot application package structure, thin controllers, feature-owned config, events, validation boundaries, transactions, wiring, integration tests. | Plain Kotlin, framework-neutral code quality, or Spring internals/libraries. |
+| `untangle-codebase` | Completing a structural refactor of a whole repository or named subsystem through investigation, implementation, independent review, and verification. | Isolated fixes, ordinary cleanup, architecture advice, or read-only flow mapping. |
 | `wiki` | Maintaining durable repo wiki/knowledge-base pages and deciding where knowledge belongs. | Temporary scratch notes or research collection that should stay in `.workbench/`. |
 
 ## Repo-local skills

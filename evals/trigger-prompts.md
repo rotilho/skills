@@ -16,6 +16,8 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Update these Java unit tests and keep every changed test visibly split into Given, When, and Then sections." | `code-practice` | Given/When/Then is a language-agnostic code-test readability convention. |
 | "This service uses two concurrent maps, mutable sets inside their values, and an aggregate limit counter. Two limit branches run the same drop callback; simplify them without breaking the guarded check-and-update invariant or moving event publication into the critical section." | `code-practice` | Framework-neutral compound-invariant and locking-strategy review. |
 | "Class A calls five collaborators today. Should it keep direct calls or publish one event and let each owner react?" | `component-ownership` | Collaboration shape and ownership decision. |
+| "Untangle this entire codebase: investigate structural problems, implement the justified refactors, and finish review and verification." | `untangle-codebase` | Complete repository-wide structural refactoring workflow. |
+| "Untangle only the report-export subsystem end to end; preserve public contracts and complete the implementation." | `untangle-codebase` | Complete structural refactoring within a named boundary. |
 | "This listener just forwards events to another service. Refactor the flow so behavior and state ownership are clearer." | `component-ownership` | Proxy/listener removal across components. |
 | "AccountService owns the account state change, but it now imports vote cleanup to mark old votes stale. Break the dependency so the source-of-truth update can notify the downstream cleanup owner." | `component-ownership` | Source-of-truth to downstream cleanup boundary should be a collaboration-shape decision. |
 | "Create a new skill for release-note generation and include trigger eval prompts plus a realistic behavior simulation." | `create-skill` | Skill authoring, trigger evaluation, and behavior simulation. |
@@ -59,6 +61,9 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Make a quick checklist in the PR description." | `local-kanban-board` | Normal prose editing. |
 | "Run the normal JVM unit tests with the existing Gradle wrapper." | `graalvm-native-build` | The repository's verification workflow. |
 | "Rename this helper and simplify the nested conditionals." | `component-ownership` | `code-practice` |
+| "Rename this helper and simplify the nested conditionals." | `untangle-codebase` | `code-practice` |
+| "Should this operation call its collaborators directly or publish an event? Give advice only." | `untangle-codebase` | `component-ownership` |
+| "Trace this existing event flow and document its commit boundaries without changing code." | `untangle-codebase` | `runtime-flow-mapping` |
 | "Fix a Kotlin Cucumber step definition that leaks scenario state." | `kotlin-code-style` | `kotlin-cucumber-tests` |
 | "Explain how to wire a Spring `@ConfigurationProperties` class." | `kotlin-code-style` | `spring-application-code-style` |
 | "Make this plain Kotlin value object idiomatic." | `spring-application-code-style` | `kotlin-code-style` |
