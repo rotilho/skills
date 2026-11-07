@@ -13,7 +13,7 @@ Global user-owned agent skills for OpenCode-compatible agents. They emphasize co
 From this repo root:
 
 ```bash
-npx skills add https://github.com/rotilho/skills -g --agent universal --skill '*' -y
+npx skills add . -g --agent universal --skill '*' -y
 ```
 
 This intentionally targets only the universal agent. Do not use `--all` for routine refreshes; in the `skills` CLI it expands to all skills for all supported agents.
