@@ -26,6 +26,7 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Audit only the primary button color in this DESIGN.md against the current CSS; report the discrepancy without rewriting the document." | `design-extractor` | Focused design audit with a read-only completion boundary. |
 | "Use a temporary Podman image to install a RAW converter and write the converted files to /tmp without installing anything on the host." | `ephemeral-container-workbench` | One-off tool installation isolated in a disposable container. |
 | "Build this project's GraalVM native binary in Podman using the same toolchain as CI." | `graalvm-native-build` | Native-image build and toolchain parity. |
+| "Run this long local build in a background service with a log and desktop notification." | `long-running-jobs` | Durable local command execution with saved status. |
 | "Diagnose this native-image build log against CI and give reproduction commands; do not edit application source." | `graalvm-native-build` | Native-build diagnosis with source changes outside scope. |
 | "Clean up these Kotlin extensions, nullability checks, and coroutine scope ownership." | `kotlin-code-style` | Kotlin-specific implementation style. |
 | "Fix only this Kotlin comment typo using the repository formatter." | `kotlin-code-style` | Mechanical Kotlin edit without a general engineering review. |
@@ -60,6 +61,7 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Move TASK-003 to review on the local board." | `orchestrated-kanban-subagents` | `local-kanban-board` |
 | "Make a quick checklist in the PR description." | `local-kanban-board` | Normal prose editing. |
 | "Run the normal JVM unit tests with the existing Gradle wrapper." | `graalvm-native-build` | The repository's verification workflow. |
+| "Run this one-second formatting check." | `long-running-jobs` | Ordinary foreground command execution. |
 | "Rename this helper and simplify the nested conditionals." | `component-ownership` | `code-practice` |
 | "Rename this helper and simplify the nested conditionals." | `untangle-codebase` | `code-practice` |
 | "Should this operation call its collaborators directly or publish an event? Give advice only." | `untangle-codebase` | `component-ownership` |
