@@ -1,6 +1,6 @@
 ---
 name: "kotlin-code-style"
-version: "1.1.0"
+version: "1.1.3"
 description: "Apply Kotlin style, type, coroutine, multiplatform, and test conventions when changing or reviewing Kotlin, including formatting. Use Spring or Cucumber guidance when framework behavior or BDD is the main concern."
 license: "MIT"
 compatibility: "opencode"
@@ -64,6 +64,10 @@ Choose explicit concurrency primitives for shared mutable runtime state. When co
 Keep public library APIs narrow, with explicit parsing, wire-format, failure, and validation contracts. Application serialization can remain boundary-specific.
 
 Use `expect` / `actual`, platform source sets, or injected platform adapters for platform behavior. Avoid common-source runtime conditionals when platform implementations fit.
+
+For `@Serializable` classes, initialized body `val` properties with backing fields can be supplied by the deserializer. If derived properties must agree with authoritative fields, consider invariant checks in an `init` block after those properties before introducing custom serializers. Verify the generated-constructor behavior with a focused reproduction, then cover direct, polymorphic, and nested decoding on supported targets. Computed getters have no backing fields and are omitted by generated serialization, so account for wire compatibility when choosing them. For projections, establish whether incoming copies must be checked or ignored; serialize-only means emitting derived values while discarding incoming copies before typed decoding. Keep any legacy-input fallback conditional on the absence of the canonical value.
+
+Distinguish source API compatibility from wire compatibility. When caller migration is allowed, remove source forwarding shims while retaining the wire fields and decoding required by older peers. Verify JSON and binary exchange in both directions with an actual older codec; added JSON fields can break strict decoders.
 
 For changed serializers, parsers, validators, or value contracts, choose relevant positive, rejection, round-trip, and boundary cases. Include platform-specific cases when platforms can differ. Dense rule matrices belong in lower-level Kotlin tests; integration tests fit contracts that depend on wiring, external boundaries, or coroutine scheduling.
 
