@@ -1,6 +1,6 @@
 ---
 name: "graalvm-native-build"
-version: "1.1.0"
+version: "1.1.1"
 description: "Build or debug GraalVM Native Image in disposable containers matching the project toolchain. Use for native compilation, static musl linking, or reachability-metadata failures; skip ordinary JVM builds."
 license: "MIT"
 compatibility: "opencode"

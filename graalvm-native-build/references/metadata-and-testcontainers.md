@@ -16,6 +16,8 @@ If the project does not already wire the generated metadata into the build, appe
 
 If the metadata-producing tests use Testcontainers, discover the active host container socket, mount it into the builder, and set `DOCKER_HOST` to the mounted path. Verify access from inside the builder. For Podman, set `TESTCONTAINERS_HOST_OVERRIDE=host.containers.internal` when mapped service ports must resolve to the host instead of builder-local `localhost`.
 
-If Ryuk fails its callback connection in a rootless Podman builder, use `TESTCONTAINERS_RYUK_DISABLED=true` for that run and clean up its test containers afterward.
+Verify both socket consumers: the builder uses `DOCKER_HOST`, while the host daemon resolves the socket bind mount requested for the sibling Ryuk container. A renamed builder-only path can pass a socket API probe yet fail when the daemon tries to mount that nonexistent host path. Prefer mounting the socket at its actual host path inside the builder and using that same path in `DOCKER_HOST`; if paths must differ, set `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE` to the daemon-visible host path. Run one small real container-backed test before the full suite to verify socket access, Ryuk startup, and mapped-port reachability together.
+
+Keep the builder network isolated when tests require fixed application ports already occupied on the host; `host.containers.internal` can still reach published test-service ports. If Ryuk still fails its callback connection after socket and network checks, use `TESTCONTAINERS_RYUK_DISABLED=true` only for that run and clean up its test containers afterward.
 
 If socket access fails, report that as an environment issue. If Ryuk is disabled, clean up any test containers that the failed run leaves behind. Do not bypass either issue by installing GraalVM on the host.
