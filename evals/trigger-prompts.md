@@ -6,7 +6,7 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 
 | Prompt | Expected skill | Why |
 |---|---|---|
-| "Capture the reusable debugging procedure we learned and put it in the existing source skill." | `auto-skill-capture` | Retaining an uncovered procedural lesson. |
+| "Capture the reusable debugging procedure we learned and put it in the existing source skill." | `create-skill` | Retaining an uncovered procedural lesson. |
 | "Review every skill's purpose and overlap; remove instructions that add no value." | `skill-library-curator` | Library-wide curation before wording changes. |
 | "Curate my global skills using the OpenAI Astra skills and prompts guide." | `skill-library-curator` | Global library review with model-aware instruction assessment. |
 | "Review every skill in this repo, including committed and nested packages, for unnecessary instructions." | `skill-library-curator` | Complete repo inventory and instruction review. |
@@ -48,7 +48,7 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 
 | Prompt | Skill that should stay inactive | Better fit |
 |---|---|---|
-| "We read twelve files and ran the existing tests; nothing new was learned. Summarize the result." | `auto-skill-capture` | Normal task reporting. |
+| "We read twelve files and ran the existing tests; nothing new was learned. Summarize the result." | `create-skill` | Normal task reporting. |
 | "Write one new skill for inspecting archive contents." | `skill-library-curator` | `create-skill` |
 | "Explain the OpenAI article about Astra skills and prompts." | `skill-library-curator` | Official documentation research; no library curation requested. |
 | "Use a subagent to review this small patch." | `orchestrated-kanban-subagents` | Ordinary delegated review. |

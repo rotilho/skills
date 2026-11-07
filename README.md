@@ -26,10 +26,9 @@ User-owned active skills:
 
 | Skill | Use when | Avoid when |
 |---|---|---|
-| `auto-skill-capture` | Capturing a reusable procedural gap revealed by work, corrections, diagnosis, or environment setup. | The lesson is already covered, routine, private, temporary, or only a task outcome. |
 | `code-practice` | Framework-neutral code quality, behavior ownership, evidence-first debugging, trust boundaries, state ownership, compatibility, tests, refactoring. | Kotlin, Spring, or Cucumber-specific rules dominate. |
 | `component-collaboration-architecture` | Choosing direct calls, orchestration, domain events, observers, projections, state ownership, proxy removal, and source-of-truth to downstream dependency boundaries. | The task is only local cleanup, language idioms, framework wiring, or test glue. |
-| `create-skill` | Creating, rewriting, or evaluating agent skills, trigger boundaries, and realistic behavior simulations. | The task is ordinary docs/code work rather than reusable skill behavior. |
+| `create-skill` | Creating, rewriting, or evaluating agent skills, and capturing uncovered procedural lessons from completed work. | The task is ordinary docs/code work, or no durable lesson was found. |
 | `deep-research` | Evidence-backed research, comparisons, audits, and gap-first source validation. | Routine local code or prompt review with no research need. |
 | `design-extractor` | Create or audit `DESIGN.md` from screenshots, Figma, CSS, tokens, brand notes, or app references, including evidence counts and conflicts. | Ordinary frontend implementation when no durable `DESIGN.md` or design extraction is requested. |
 | `ephemeral-container-workbench` | Running one-off tools, converters, SDKs, or package installs in a temporary Podman/Docker container instead of mutating the host. | The repo already owns the toolchain, a long-lived service is needed, or the user wants the dependency installed locally. |
@@ -42,6 +41,10 @@ User-owned active skills:
 | `skill-library-curator` | Periodic curation of global or repo-local skills, duplicate merges, promotions, embeddings, archive moves, vague skill cleanup, and curation reports. | Creating one new skill without reviewing the broader library. |
 | `spring-application-code-style` | Spring Boot application package structure, thin controllers, feature-owned config, events, validation boundaries, transactions, wiring, integration tests. | Plain Kotlin, framework-neutral code quality, or Spring internals/libraries. |
 | `wiki` | Maintaining durable repo wiki/knowledge-base pages and deciding where knowledge belongs. | Temporary scratch notes or research collection that should stay in `.workbench/`. |
+
+## Repo-local skills
+
+GCP VM CPU scheduling lives in the `node` repository at `.agents/skills/gcp-vm-cpu-scheduling/`. It is excluded from this global source root; the normal universal-only refresh command remains unchanged.
 
 ## External skills
 

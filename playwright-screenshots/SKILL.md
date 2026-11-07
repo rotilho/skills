@@ -1,6 +1,6 @@
 ---
 name: "playwright-screenshots"
-version: "1.0.1"
+version: "1.0.4"
 description: "Use when a task needs browser screenshots, visual verification, page smoke tests, or headless browser capture after browsermcp is unavailable or unnecessary. Prefer Playwright for localhost, static files, generated pages, and unauthenticated pages; note when a live user browser session is required instead."
 license: "MIT"
 compatibility: "codex"
@@ -37,6 +37,10 @@ npx --yes playwright screenshot --viewport-size=390,844 --full-page http://127.0
 ```
 
 Wait for the page's required content or state when needed. A fixed delay alone does not prove it is ready.
+
+Use the app's own acceptance criteria for behavior checks. For timed interfaces,
+verify the relevant intermediate states as well as the final frame; a screenshot
+alone does not prove playback or interaction behavior.
 
 3. If capture fails because Chromium is missing, install the browser with the same Playwright version and retry:
 

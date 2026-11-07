@@ -1,7 +1,7 @@
 ---
 name: "create-skill"
-version: "1.1.0"
-description: "Create or improve an agent skill. Use when the user wants a new `SKILL.md`, a rewrite of an existing skill, better trigger coverage, behavior simulation, trigger/overlap evaluation, tighter instructions, or a repeated workflow turned into a reusable skill."
+version: "1.2.0"
+description: "Create or improve an agent skill, or capture an uncovered procedural lesson from completed work. Use for new SKILL.md packages, skill rewrites, trigger evaluation, behavior simulation, and reusable workflow capture; skip routine work with no durable lesson."
 license: "MIT"
 compatibility: "opencode"
 metadata:
@@ -11,13 +11,21 @@ metadata:
 
 # Create Skill
 
-Create, rewrite, or evaluate reusable agent instructions. Use `auto-skill-capture` to decide what to retain from completed work, and `skill-library-curator` for library-wide ownership and overlap decisions.
+Create, rewrite, or evaluate reusable agent instructions. Use `skill-library-curator` for library-wide ownership and overlap decisions.
+
+## Decide whether a lesson needs capture
+
+When retaining completed work, identify what a future agent should do differently and why existing guidance is insufficient. Task length or difficulty alone does not justify a skill. Skip lessons that are already covered, obvious, one-off outcomes, or inseparable from private context; finish without an artifact when no durable gap exists.
+
+Exclude task progress, PR/issue numbers, branches, commit hashes, incident logs, secrets, and private data. Convert facts likely to expire into instructions for checking them afresh.
 
 ## 1. Establish the purpose and source
 
-Infer the intended task, expected work product, runtime, and skill name from the request. Inspect existing skills and local instructions before writing. Edit the canonical user-owned source, preserving unrelated changes; installed/generated or third-party copies need explicit authorization.
+Infer the intended task, expected work product, runtime, and skill name from the request. Resolve canonical source roots from the request, local agent instructions, or `SELF-IMPROVE.md`. Search names, descriptions, and bodies in available global and repo-local sources before writing. Edit the canonical user-owned source, preserving unrelated changes; installed/generated or third-party copies need explicit authorization.
 
 Choose an existing owner when the behavior fits its trigger boundary. Create a separate skill only for a distinct workflow. Do not expand an adjacent skill just because its name is similar.
+
+Use global placement for procedures that work across repos. Keep repo-dependent paths, scripts, product language, fixtures, deployment topology, and ownership assumptions repo-local. If removing those assumptions makes the procedure vague, keep it local. Keep machine-specific source locations and refresh bindings in agent configuration rather than reusable skill bodies.
 
 Write the description first: what the skill does, when it should activate, and the boundary with nearby skills. Aim for correct selection, including realistic near misses.
 
@@ -49,6 +57,10 @@ For a new skill or a behavior-changing update, run a realistic isolated task sim
 
 Trigger checks do not replace behavior simulation. If isolated agents are unavailable, use the closest realistic scratch exercise and report the limitation. Skip behavioral verification only for unchanged behavior, a trigger-only review, or an unavailable environment that a realistic fixture cannot replace; state the reason.
 
-Check final frontmatter, name/folder agreement, support links, and absence of unintended placeholders. Run the smallest relevant repo validation. Follow the configured refresh process for global source changes, preserving its agent scope, unless the user requested source-only work.
+Check final frontmatter, name/folder agreement, support links, and absence of unintended placeholders. Review captured lessons for temporary/private data and misplaced repo assumptions. Run the smallest relevant repo validation. Follow the configured refresh process for global source changes, preserving its agent scope, unless the user requested source-only work. Do not substitute `--all` for a scoped install. Repo-local changes need no global refresh; if refresh is unavailable, report that limitation without treating source work as undone.
 
 Report the skill changed, the behavior improved, verification performed, and any unresolved limitation. Complete the artifact unless the user asked only for a plan or review.
+
+## Self-improvement setup
+
+When asked to install or configure an agent-level capture policy, use [the portable policy example](references/self-improve-example.md). Ordinary lesson capture does not require creating a policy file.

@@ -19,7 +19,7 @@ These are example machine settings. Use resolved paths for file operations and r
 
 At the end of substantial work, consider whether it revealed a durable procedural gap. A long task or a user correction is a reason to look, not a reason by itself to create a skill.
 
-Use `auto-skill-capture` to decide what to retain and where it belongs. Search existing source skills first and prefer a focused patch. Use `create-skill` for authoring and realistic behavioral verification; use `skill-library-curator` for broader reviews, merges, and archiving.
+Use `create-skill` to decide what to retain, choose its source owner, author the guidance, and verify its behavior. Search existing source skills first and prefer a focused patch. Use `skill-library-curator` for broader reviews, merges, and archiving.
 
 Skills store reusable procedures, decision rules, prerequisites, pitfalls, and verification. Exclude progress, one-off outcomes, PR/issue numbers, branches, commit hashes, incident logs, secrets, private data, and facts that should be checked fresh.
 
