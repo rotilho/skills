@@ -37,6 +37,9 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Improve this Spring Boot controller/service/repository package structure and transaction boundary." | `spring-application-code-style` | Spring application architecture. |
 | "Clean up this Spring Boot app so controllers stay thin, feature config validates at startup, and async event tests prove downstream observable state." | `spring-application-code-style` | Spring application edges, configuration, async events, and validation. |
 | "Run these Spring Boot AOT-backed Gradle test tasks without colliding on processTestAot output." | `spring-application-code-style` | Spring AOT verification and generated-output ownership. |
+| "Map transaction submission through account persistence and dependent work, following actual events, workers, and completion callbacks." | `runtime-flow-mapping` | Reconstructing an existing runtime scenario from source. |
+| "Compare this sequence diagram with the current implementation; verify calls, event delivery, and after-commit semantics." | `runtime-flow-mapping` | Source-backed runtime map verification without redesign. |
+| "A write committed but a consumer has not finished. Trace what publication, worker completion, and callbacks actually guarantee." | `runtime-flow-mapping` | Establishing completion and ordering semantics across existing boundaries. |
 | "Decide where this architecture decision belongs in the repo wiki and link related pages." | `wiki` | Durable knowledge-base organization. |
 | "Create a small wiki from these architecture notes and link it from README; the repo has no docs directory yet." | `wiki` | Authorized wiki creation includes choosing a conventional location. |
 | "Create a local Markdown Kanban board with task dependencies for this repo." | `local-kanban-board` | Persistent repo-local task tracking. |
@@ -73,6 +76,11 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Use my current Chrome tab and logged-in cookies to inspect this dashboard." | `playwright-screenshots` | Browser bridge or exported auth state |
 | "Scrape the latest pricing table from this public website." | `playwright-screenshots` | `firecrawl` or web research tooling |
 | "Install a browser extension into my personal Chrome profile." | `playwright-screenshots` | Manual browser setup or browser bridge |
+| "Redesign these collaborating services: choose direct calls, domain events, or a projection and assign state ownership." | `runtime-flow-mapping` | `component-ownership` |
+| "Move these architecture decision records into the existing wiki and repair their index links." | `runtime-flow-mapping` | `wiki` |
+| "Fix spelling in this event-flow document without changing its technical content." | `runtime-flow-mapping` | Normal prose editing |
+| "Show how to declare a Spring listener method for this existing event." | `runtime-flow-mapping` | `spring-application-code-style` |
+| "Create a reusable skill that maps existing runtime flows." | `runtime-flow-mapping` | `create-skill` |
 | "Organize temporary raw scrape outputs from a research run." | `wiki` | `deep-research` working artifacts |
 
 ## Realistic workflow prompts
