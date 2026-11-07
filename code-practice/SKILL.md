@@ -17,7 +17,7 @@ Apply the guidance relevant to the requested review or change. Inspect the affec
 
 - For shared mutation, concurrent collections, or locking decisions, read [compound state](references/compound-state.md).
 - Before adding retries, fallbacks, guards, recovery branches, or failure tests, read [defensive behavior](references/defensive-behavior.md).
-- For direct calls versus events, forwarding chains, projections, or cross-component ownership, use `component-collaboration-architecture`.
+- For direct calls versus events, forwarding chains, projections, or cross-component ownership, use `component-ownership`.
 - For Kotlin mechanics, Spring-managed boundaries, or Cucumber scenarios, use `kotlin-code-style`, `spring-application-code-style`, or `kotlin-cucumber-tests` as the primary skill. They can use the relevant shared policies here without turning a specialist task into a general code review.
 
 Load only the guidance the task needs, then continue the authorized work.

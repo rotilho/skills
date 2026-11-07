@@ -1,6 +1,6 @@
 ---
-name: "component-collaboration-architecture"
-version: "1.2.0"
+name: "component-ownership"
+version: "1.3.0"
 description: "Design or refactor component collaboration and state ownership. Use for direct calls versus events, forwarding chains, dependency cycles, projections, or cross-component invariants; skip ordinary style and framework wiring."
 license: "MIT"
 compatibility: "opencode"
@@ -9,7 +9,7 @@ metadata:
   workflow: "architecture"
 ---
 
-# Component Collaboration Architecture
+# Component Ownership
 
 Decide how the affected components should collaborate and where their behavior, data, and failure responsibility belong. Scope analysis and changes to the requested boundary; an architecture question can end with a reasoned recommendation without refactoring code.
 
@@ -37,6 +37,8 @@ For affected data, make the source of truth, writer, readers, projection owners,
 Keep requests as commands, calls, jobs, or workflow steps. Events describe completed facts such as `PrimaryDocumentChanged`; a name such as `CleanSearchIndexRequested` disguises a command. Do not split required synchronous work into events just because several collaborators are involved.
 
 ## Change only collaboration that causes the problem
+
+When several forwarding paths, caller-specific branches, or workarounds reflect the same missing responsibility, evaluate one ownership or contract change that addresses them together. For a dependency cycle, identify the required behavior behind each edge; hiding an edge in global state, service lookup, or an event does not resolve its ownership or sequencing obligations.
 
 - Collapse pass-through listener, handler, or proxy chains when they own no translation, protocol adaptation, authorization, retry, lifecycle, observability, or meaningful deduplication.
 - Move decisions and state out of generic coordinators or registries into their behavior owner. Keep an orchestrator when the workflow itself has an independent responsibility.

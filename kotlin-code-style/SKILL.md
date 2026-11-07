@@ -20,7 +20,7 @@ For formatting or comment-only work, go directly to [Format and verify](#format-
 Load another skill only when the task needs its policies and they are not already available:
 
 - `code-practice`: shared ownership, compound state, trust boundaries, error handling, or test design. New or changed code-based tests retain its explicit `Given`, `When`, and `Then` comment sections.
-- `component-collaboration-architecture`: direct calls versus events, projections, or ownership across components.
+- `component-ownership`: direct calls versus events, projections, or ownership across components.
 - `spring-application-code-style`: controllers, transactions, bean wiring, or Spring-managed lifecycle behavior.
 - `kotlin-cucumber-tests`: feature files, step definitions, hooks, and BDD scenarios.
 

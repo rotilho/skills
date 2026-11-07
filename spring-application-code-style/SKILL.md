@@ -20,7 +20,7 @@ For AOT output collisions or build-only verification, go directly to [Verificati
 Load another skill only when its decisions are part of the task and its guidance is not already available:
 
 - `code-practice`: framework-neutral ownership, state invariants, trust boundaries, error handling, or test design. New or changed code-based tests retain its explicit `Given`, `When`, and `Then` comment sections.
-- `component-collaboration-architecture`: deciding between direct calls and events, forwarding chains, projections, or cross-component ownership.
+- `component-ownership`: deciding between direct calls and events, forwarding chains, projections, or cross-component ownership.
 - `kotlin-code-style`: Kotlin types, extensions, nullability, coroutine mechanics, and Kotlin formatting.
 
 ## Application boundaries and wiring

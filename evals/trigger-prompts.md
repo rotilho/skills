@@ -15,9 +15,9 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Reorganize this module's files around its existing workflows and improve generic names; keep component interactions and state ownership unchanged." | `code-practice` | File organization and naming without redesigning component collaboration. |
 | "Update these Java unit tests and keep every changed test visibly split into Given, When, and Then sections." | `code-practice` | Given/When/Then is a language-agnostic code-test readability convention. |
 | "This service uses two concurrent maps, mutable sets inside their values, and an aggregate limit counter. Two limit branches run the same drop callback; simplify them without breaking the guarded check-and-update invariant or moving event publication into the critical section." | `code-practice` | Framework-neutral compound-invariant and locking-strategy review. |
-| "Class A calls five collaborators today. Should it keep direct calls or publish one event and let each owner react?" | `component-collaboration-architecture` | Collaboration shape and ownership decision. |
-| "This listener just forwards events to another service. Refactor the flow so behavior and state ownership are clearer." | `component-collaboration-architecture` | Proxy/listener removal across components. |
-| "AccountService owns the account state change, but it now imports vote cleanup to mark old votes stale. Break the dependency so the source-of-truth update can notify the downstream cleanup owner." | `component-collaboration-architecture` | Source-of-truth to downstream cleanup boundary should be a collaboration-shape decision. |
+| "Class A calls five collaborators today. Should it keep direct calls or publish one event and let each owner react?" | `component-ownership` | Collaboration shape and ownership decision. |
+| "This listener just forwards events to another service. Refactor the flow so behavior and state ownership are clearer." | `component-ownership` | Proxy/listener removal across components. |
+| "AccountService owns the account state change, but it now imports vote cleanup to mark old votes stale. Break the dependency so the source-of-truth update can notify the downstream cleanup owner." | `component-ownership` | Source-of-truth to downstream cleanup boundary should be a collaboration-shape decision. |
 | "Create a new skill for release-note generation and include trigger eval prompts plus a realistic behavior simulation." | `create-skill` | Skill authoring, trigger evaluation, and behavior simulation. |
 | "Research current options for hosted vector databases and recommend one with sources." | `deep-research` | Multi-source evidence-backed research. |
 | "Create a DESIGN.md from these screenshots, Tailwind config, and brand notes; count which references support each section and flag inconsistencies." | `design-extractor` | DESIGN.md extraction with evidence counts and conflicts. |
@@ -55,7 +55,7 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Move TASK-003 to review on the local board." | `orchestrated-kanban-subagents` | `local-kanban-board` |
 | "Make a quick checklist in the PR description." | `local-kanban-board` | Normal prose editing. |
 | "Run the normal JVM unit tests with the existing Gradle wrapper." | `graalvm-native-build` | The repository's verification workflow. |
-| "Rename this helper and simplify the nested conditionals." | `component-collaboration-architecture` | `code-practice` |
+| "Rename this helper and simplify the nested conditionals." | `component-ownership` | `code-practice` |
 | "Fix a Kotlin Cucumber step definition that leaks scenario state." | `kotlin-code-style` | `kotlin-cucumber-tests` |
 | "Explain how to wire a Spring `@ConfigurationProperties` class." | `kotlin-code-style` | `spring-application-code-style` |
 | "Make this plain Kotlin value object idiomatic." | `spring-application-code-style` | `kotlin-code-style` |
@@ -63,8 +63,8 @@ Use these prompts after changing skill descriptions or overlap boundaries. Expec
 | "Add Given, When, and Then sections to these Java tests." | `kotlin-code-style` | `code-practice` |
 | "Show the Java `ConcurrentHashMap.computeIfAbsent` API for computing one independent value per key." | `code-practice` | Java/JDK API documentation |
 | "Add boundary and malformed-input tests for this Kotlin serializer." | `kotlin-cucumber-tests` | `kotlin-code-style` |
-| "Review whether this event listener should be direct call or event projection across three components." | `spring-application-code-style` | `component-collaboration-architecture` |
-| "Explain how to declare a Spring `@EventListener` method for an existing event." | `component-collaboration-architecture` | `spring-application-code-style` |
+| "Review whether this event listener should be direct call or event projection across three components." | `spring-application-code-style` | `component-ownership` |
+| "Explain how to declare a Spring `@EventListener` method for an existing event." | `component-ownership` | `spring-application-code-style` |
 | "Fix this Spring-free coroutine mutex race in a plain Kotlin library." | `spring-application-code-style` | `kotlin-code-style` |
 | "Format this plain Kotlin module and run one focused unit test." | `spring-application-code-style` | `kotlin-code-style` |
 | "Summarize this provided note more briefly." | `deep-research` | Normal prose editing; follow AGENTS.md writing guidance. |
