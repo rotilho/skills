@@ -1,6 +1,6 @@
 ---
 name: "code-practice"
-version: "1.1.0"
+version: "1.2.0"
 description: "Apply framework-neutral code quality guidance for readability, refactoring, ownership, concurrency, trust boundaries, and behavior-focused tests. Use when these engineering decisions are the main task; use specialist skills for language or framework rules."
 license: "MIT"
 compatibility: "opencode"
@@ -28,12 +28,22 @@ For a defect or operational issue, establish a read-only baseline from the faili
 
 For a design review or refactor, identify the concrete pressure in the affected code: unclear names, mixed decisions, duplicated policy, hidden side effects, or misplaced ownership. Do not manufacture a defect or expand the task to satisfy these categories.
 
+For structural refactors, ask which pieces must change together and which should change independently. Look for:
+
+- Hidden coupling: duplicated decisions, undeclared shared inputs, scattered feature rules, or a sequence callers must remember.
+- Needless coupling: callers exposed to irrelevant internals, vendor choices, or parameters meaningful only to another workflow.
+- Surplus structure: unused code or abstractions without a current responsibility. Check external consumers and compatibility before treating a missing local caller as proof.
+
+Use current callers and requirements as evidence. Relevant Git history can reveal repeated coordinated edits, but co-change alone does not establish shared ownership. Use an import graph when dependency direction is unclear; inspect behavior and runtime contracts before judging its edges.
+
+Group related symptoms under a proposed ownership or contract change before patching them separately. For a broad refactor whose rationale would otherwise be hard to retain, keep a compact decision log linking changes to evidence, requirements, and verification. Retain necessary domain exceptions, compatibility paths, and recovery; fewer branches or files is not itself proof of improvement. Finish when the selected design pressures and affected contracts are addressed.
+
 ## Ownership, readability, and abstraction
 
 - Place behavior, its state, policies, adapters, and tests with the smallest feature, workflow, or concept that owns them. Shared contracts can live separately; avoid mixed-concern utility buckets and root-level behavior files when an owner exists.
 - Name responsibilities and observable intent in domain language. Avoid placeholders such as `util`, `manager`, or `misc`; name booleans and predicates so both outcomes read naturally.
 - Keep each unit responsible for one kind of decision and one level of abstraction. Split when mixed decisions, nesting, or section comments obscure the flow; prefer early exceptional branches when they clarify the main path.
-- Keep operations and mandatory follow-up state transitions cohesive. Split them only for a valid independent lifecycle or policy boundary; extract a repeated compound transition at the smallest shared scope when that exposes its invariant.
+- Keep operations and mandatory follow-up state transitions cohesive. When callers must remember a sequence, expose a cohesive operation or an explicit protocol. Split only for a valid independent lifecycle or policy boundary; extract a repeated compound transition at the smallest shared scope when that exposes its invariant.
 - Group cohesive parameters without creating grab-bag objects. Separate commands from queries when combining them hides side effects, and avoid mode flags when distinct entry points clarify the contract.
 - Remove duplication of behavior or policy, not merely repeated tokens. Do not extract helpers just to reshape one local value, satisfy symmetry, or anticipate speculative reuse.
 - Keep a forwarding layer only when it owns a decision, invariant, boundary translation, or meaningful deduplication. Prefer direct data flow over indirection and implicit shared state.
